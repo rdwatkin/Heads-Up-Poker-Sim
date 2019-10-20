@@ -10,7 +10,7 @@ class Home extends React.Component {
     render() {
         return (
             <div>
-                <h1>You are logged in..</h1>
+                <h1>You are logged in.. test</h1>
                 <button onClick={this.logout}>Logout</button>
             </div>
         )
