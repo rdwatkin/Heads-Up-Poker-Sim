@@ -1,5 +1,6 @@
 import React from 'react';
 import fire from './config/fire';
+import cards from './images/cards.png';
 
 class Home extends React.Component {
 
@@ -10,11 +11,25 @@ class Home extends React.Component {
     render() {
         return (
             <div>
-                <h1>You are logged in..</h1>
-                <button onClick={this.logout}>Logout</button>
+                <div>
+                    <h1>You are logged in..</h1>
+                    <button style={{margin: '10px'}} onClick={this.logout}>Logout</button>
+                </div>
+                <div>
+                    <button style={{margin: '10px'}} onClick={this.login}>PvP</button>
+                    <button style={{margin: '10px'}} onClick={this.login}>PvE</button>
+                </div>
+                
+                <img src={cards} 
+                    style={{position: "absolute", 
+                        bottom: 0, right: 0,
+                        height: "15em", 
+                        marginRight: "1 em",
+                        marginBottom: "1 em"}}/>
             </div>
         )
     }
+
 }
 
 export default Home;

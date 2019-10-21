@@ -1,5 +1,6 @@
 import React from 'react';
 import fire from './config/fire';
+import cards from './images/cards.png';
 
 class login extends React.Component {
 
@@ -45,6 +46,13 @@ class login extends React.Component {
                 </div>
                 <button style={{margin: '10px'}} onClick={this.login}>Login</button>
                 <button style={{margin: '10px'}} onClick={this.signUp}>Sign Up</button>
+
+                <img src={cards} 
+                    style={{position: "absolute", 
+                        bottom: 0, right: 0,
+                        height: "15em", 
+                        marginRight: "1 em",
+                        marginBottom: "1 em"}}/>
             </div>
         )
     }
