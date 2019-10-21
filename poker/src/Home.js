@@ -10,7 +10,7 @@ class Home extends React.Component {
     
     render() {
         return (
-            <div>
+            <div align="center">
                 <div>
                     <h1>You are logged in..</h1>
                     <button style={{margin: '10px'}} onClick={this.logout}>Logout</button>
@@ -21,8 +21,8 @@ class Home extends React.Component {
                 </div>
                 
                 <img src={cards} 
-                    style={{position: "absolute", 
-                        bottom: 0, right: 0,
+                    style={{position: "relative", 
+                        bottom: 0, center: 0,
                         height: "15em", 
                         marginRight: "1 em",
                         marginBottom: "1 em"}}/>
