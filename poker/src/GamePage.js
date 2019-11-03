@@ -28,6 +28,8 @@ class GamePage extends React.Component {
         return (
             <div>
                 <div style={{display: 'flex', justifyContent: 'left', height: "50%", margin: '10px'}}>
+                    <h1 style={{textAlign: "center", margin: '30px', marginLeft: '210px'}}>
+                        Opponent Stack<br/> 77</h1>
                     <img src={back} style={{height: "10em", margin: '10px'}}/>
                     <img src={back} style={{height: "10em", margin: '10px'}}/>
                 </div>
@@ -39,11 +41,14 @@ class GamePage extends React.Component {
                     <img src={C1} style={{height: "10em", marginRight: '10px'}}/>
                     <img src={S10} style={{height: "10em", marginRight: '10px'}}/>
                     <img src={H2} style={{height: "10em", marginRight: '10px'}}/>
+                    <h1 style={{textAlign: "center", margin: '30px'}}>Pot<br/> 55</h1>
                 </div>
 
 
 
                 <div style={{display: 'flex', justifyContent: 'left', height: "100%", margin: '10px'}}>
+                    <h1 style={{textAlign: "center", margin: '30px', marginLeft: '300px'}}>
+                        My Stack<br/> 100</h1>
                     <img src={H5} style={{height: "10em", margin: '10px'}}/>
                     <img src={C12} style={{height: "10em", margin: '10px'}}/>
 
