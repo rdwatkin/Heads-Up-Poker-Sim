@@ -3,6 +3,7 @@ import fire from './config/fire';
 import cards from './images/cards.png';
 
 // Importing all 52 cards
+import back from './images/back.png';
 import S1 from './images/1S.png';   import H1 from './images/1H.png';   import D1 from './images/1D.png';   import C1 from './images/1C.png';
 import S2 from './images/2S.png';   import H2 from './images/2H.png';   import D2 from './images/2D.png';   import C2 from './images/2C.png';
 import S3 from './images/3S.png';   import H3 from './images/3H.png';   import D3 from './images/3D.png';   import C3 from './images/3C.png';
@@ -26,25 +27,35 @@ class GamePage extends React.Component {
     render() {
         return (
             <div>
-                <div>
-                    <h1>Your hand:</h1>
+                <div style={{display: 'flex', justifyContent: 'left', height: "50%", margin: '10px'}}>
+                    <img src={back} style={{height: "10em", margin: '10px'}}/>
+                    <img src={back} style={{height: "10em", margin: '10px'}}/>
                 </div>
 
-                <div style={{display: 'flex', justifyContent: 'center', height: "100%"}}>
-                    <img src={S1} style={{height: "15em", margin: '10px'}}/>
-                    <img src={H5} style={{height: "15em", margin: '10px'}}/>
-                    <img src={C12} style={{height: "15em", margin: '10px'}}/>
+
+                <div style={{display: 'flex', justifyContent: 'center', height: "50%", margin: '10px'}}>
+                    <img src={S2} style={{height: "10em", marginRight: '10px'}}/>
+                    <img src={H7} style={{height: "10em", marginRight: '10px'}}/>
+                    <img src={C1} style={{height: "10em", marginRight: '10px'}}/>
+                    <img src={S10} style={{height: "10em", marginRight: '10px'}}/>
+                    <img src={H2} style={{height: "10em", marginRight: '10px'}}/>
                 </div>
 
-                <div style={{display: 'flex', justifyContent: 'center', height: "100%"}}>
-                    <button className="Button" style={{margin: '10px'}} onClick={this.login}>CHECK</button>
-                    <button className="Button" style={{margin: '10px'}} onClick={this.login}>BET</button>
-                    <button className="Button" style={{margin: '10px'}} onClick={this.login}>RAISE</button>
-                    <button className="Button" style={{margin: '10px'}} onClick={this.login}>CALL</button>
-                    <button className="Button" style={{margin: '10px'}} onClick={this.login}>FOLD</button>
+
+
+                <div style={{display: 'flex', justifyContent: 'left', height: "100%", margin: '10px'}}>
+                    <img src={H5} style={{height: "10em", margin: '10px'}}/>
+                    <img src={C12} style={{height: "10em", margin: '10px'}}/>
+
+                    <div style={{display: 'flex', justifyContent: 'center', height: "100%", flexDirection: 'column'}}>
+                        <button style={{margin: '7px', marginTop: '15px'}} onClick={this.login}>CHECK</button>
+                        <button style={{margin: '7px'}} onClick={this.login}>BET</button>
+                        <button style={{margin: '7px'}} onClick={this.login}>RAISE</button>
+                        <button style={{margin: '7px'}} onClick={this.login}>CALL</button>
+                        <button style={{margin: '7px'}} onClick={this.login}>FOLD</button>
+                    </div>
                 </div>
-                
-                
+   
             </div>
         )
     }
