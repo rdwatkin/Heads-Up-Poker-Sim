@@ -18,10 +18,78 @@ import S11 from './images/JS.png';  import H11 from './images/JH.png';   import 
 import S12 from './images/QS.png';  import H12 from './images/QH.png';  import D12 from './images/QD.png';  import C12 from './images/QC.png';
 import S13 from './images/KS.png';  import H13 from './images/KH.png';  import D13 from './images/KD.png';  import C13 from './images/KC.png';
  
+const images = require.context('./images', true);
+
 class GamePage extends React.Component {
+    
+    constructor() {
+        super()
+        this.deal_to_players = this.deal_to_players.bind(this);
+        this.deal_random_card = this.deal_random_card.bind(this);
+        this.get_card_img = this.get_card_img.bind(this);
+        this.state = {Ca1: "", Ca2: "", Ca3: ""}
+    }
+
+    componentWillMount(){
+        this.upload_flop()
+        fire.database().ref("/Root/GameID/flop").once('value', snapshot => {
+                var Car1 = snapshot.child("C1").val()
+                var Car2 = snapshot.child("C2").val()
+                var Car3 = snapshot.child("C3").val()
+                console.log("\n\n" + Car1);
+                this.setState({
+                    Ca1: Car1,
+                    Ca2: Car2,
+                    Ca3: Car3
+                })
+            })
+    }
+    
+    upload_card_to_database(path, name, card){
+        return function() {
+            fire.database().ref(path).set({
+                name: card
+            });
+        }
+    }
  
     logout() {
         fire.auth().signOut();
+    }
+
+    deal_random_card() {
+        var deck = ["1S", "2S", "3S", "4S", "5S", "6S", "7S", "8S", "9S", "10S", "JS", "QS", "KS",
+                    "1H", "2H", "3H", "4H", "5H", "6H", "7H", "8H", "9H", "10H", "JH", "QH", "KH",
+                    "1D", "2D", "3D", "4D", "5D", "6D", "7D", "8D", "9D", "10D", "JD", "QD", "KD",
+                    "1C", "2C", "3C", "4C", "5C", "6C", "7C", "8C", "9C", "10C", "JC", "QC", "KC"];
+        let card = deck[Math.floor(Math.random()*52)];
+        let imgsrc = images('./'+card+'.png');
+        return <img src={imgsrc} style={{height: "10em", marginRight: '10px'}}/>
+    }
+
+    get_random_card() {
+        var deck = ["1S", "2S", "3S", "4S", "5S", "6S", "7S", "8S", "9S", "10S", "JS", "QS", "KS",
+                    "1H", "2H", "3H", "4H", "5H", "6H", "7H", "8H", "9H", "10H", "JH", "QH", "KH",
+                    "1D", "2D", "3D", "4D", "5D", "6D", "7D", "8D", "9D", "10D", "JD", "QD", "KD",
+                    "1C", "2C", "3C", "4C", "5C", "6C", "7C", "8C", "9C", "10C", "JC", "QC", "KC"];
+        let card = deck[Math.floor(Math.random()*52)];
+        return card;
+    }
+
+    upload_flop(){
+        fire.database().ref("/Root/GameID/flop").set({
+            C1: this.get_random_card(),
+            C2: this.get_random_card(),
+            C3: this.get_random_card()
+        })
+    }
+
+    get_card_img(card){
+        if (card == ""){
+            card = "1S";
+        }
+        let imgsrc = images('./'+card+'.png');
+        return <img src={imgsrc} style={{height: "10em", marginRight: '10px'}}/>;
     }
     
     //deal function, randomly choose a card to assign.
@@ -83,23 +151,18 @@ class GamePage extends React.Component {
     render() {
         return (
             <div>
-                <div style={{display: 'flex', justifyContent: 'left', height: "50%", margin: '10px'}}>
+                <div style={{display: 'flex', justifyContent: 'center', height: "50%", margin: '50px'}}>
                     <img src={back} style={{height: "10em", margin: '10px'}}/>
                     <img src={back} style={{height: "10em", margin: '10px'}}/>
                 </div>
- 
  
                 <div style={{display: 'flex', justifyContent: 'center', height: "50%", margin: '10px'}}>
-                    <img src={S2} style={{height: "10em", marginRight: '10px'}}/>
-                    <img src={H7} style={{height: "10em", marginRight: '10px'}}/>
-                    <img src={C1} style={{height: "10em", marginRight: '10px'}}/>
-                    <img src={S10} style={{height: "10em", marginRight: '10px'}}/>
-                    <img src={H2} style={{height: "10em", marginRight: '10px'}}/>
+                    { this.get_card_img(this.state.Ca1) }
+                    { this.get_card_img(this.state.Ca2) }
+                    { this.get_card_img(this.state.Ca3) }
                 </div>
  
- 
- 
-                <div style={{display: 'flex', justifyContent: 'left', height: "100%", margin: '10px'}}>
+                <div style={{display: 'flex', justifyContent: 'center', height: "100%", margin: '50px'}}>
                     <img src={H6} style={{height: "10em", margin: '10px'}}/>
                     <img src={H7} style={{height: "10em", margin: '10px'}}/>
  
