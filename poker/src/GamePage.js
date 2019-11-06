@@ -93,7 +93,8 @@ class GamePage extends React.Component {
     }
     
     //deal function, randomly choose a card to assign.
-    deal_to_players() {
+    //returns arary of 9 cards
+    deal_nine_cards() {
         //initialize number of cards in the deck
         var cards_left = 52;
         //create data structure that hold all cards
@@ -101,11 +102,12 @@ class GamePage extends React.Component {
                     "H1", "H2", "H3", "H4", "H5", "H6", "H7", "H8", "H9", "H10", "H11", "H12", "H13",
                     "D1", "D2", "D3", "D4", "D5", "D6", "D7", "D8", "D9", "D10", "D11", "D12", "D13",
                     "C1", "C2", "C3", "C4", "C5", "C6", "C7", "C8", "C9", "C10", "C11", "C12", "C13"];
+        //create array of dealt cards
+        var dealt_cards = ["temp1", "temp2", "temp3", "temp4", "temp5", "temp6", "temp7", "temp8", "temp9"];
         //create random1, number between 1 and 52
         var random1 = Math.floor(Math.random() * 52);
         var card1 = deck[random1];
         //add card1 to array of dealt cards
-        var dealt_cards = ["temp1", "temp2", "temp3", "temp4"];
         dealt_cards[0] = card1;
         //choose random2
         var random2 = Math.floor(Math.random() * 52);
@@ -128,24 +130,43 @@ class GamePage extends React.Component {
         }
         var card4 = deck[random4];
         dealt_cards[3] = card4;
- 
+        //choose random5
+        var random5 = Math.floor(Math.random() * 52);
+        while(random5 == random1 || random5 == random2 || random5 == random3 || random5 == random4){
+            random5 = Math.floor(Math.random() * 52);
+        }
+        var card5 = deck[random5];
+        dealt_cards[4] = card5;
+        //choose random6
+        var random6 = Math.floor(Math.random() * 52);
+        while(random6 == random1 || random6 == random2 || random6 == random3 || random6 == random4 || random6 == random5){
+            random6 = Math.floor(Math.random() * 52);
+        }
+        var card6 = deck[random6];
+        dealt_cards[5] = card6;
+        //choose random7
+        var random7 = Math.floor(Math.random() * 52);
+        while(random7 == random1 || random7 == random2 || random7 == random3 || random7 == random4 || random7 == random5 || random7 == random6){
+            random7 = Math.floor(Math.random() * 52);
+        }
+        var card7 = deck[random7];
+        dealt_cards[6] = card7;
+        //choose random8
+        var random8 = Math.floor(Math.random() * 52);
+        while(random8 == random1 || random8 == random2 || random8 == random3 || random8 == random4 || random8 == random5 || random8 == random6 || random8 == random7){
+            random8 = Math.floor(Math.random() * 52);
+        }
+        var card8 = deck[random8];
+        dealt_cards[7] = card8;
+        //choose random9
+        var random9 = Math.floor(Math.random() * 52);
+        while(random9 == random1 || random9 == random2 || random9 == random3 || random9 == random4 || random9 == random5 || random9 == random6 || random9 == random7 || random8){
+            random9 = Math.floor(Math.random() * 52);
+        }
+        var card9 = deck[random9];
+        dealt_cards[8] = card9;
         //return dealt cards, as an array
         return dealt_cards;
-    }
- 
-    //take updated linked list as input from deal players
-    deal_flop(){
-        //temp
-    }
- 
-    //take updated linked list as input from deal flop
-    deal_turn(){
-        //temp
-    }
- 
-    //take updated linked list as input from deal turn
-    deal_river(){
-        //temp
     }
  
     render() {
