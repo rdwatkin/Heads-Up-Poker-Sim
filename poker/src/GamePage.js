@@ -24,7 +24,7 @@ class GamePage extends React.Component {
     
     constructor() {
         super()
-        this.deal_to_players = this.deal_to_players.bind(this);
+        this.deal_nine_cards = this.deal_nine_cards.bind(this);
         this.deal_random_card = this.deal_random_card.bind(this);
         this.get_card_img = this.get_card_img.bind(this);
         this.state = {Ca1: "", Ca2: "", Ca3: ""}
