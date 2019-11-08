@@ -24,10 +24,10 @@ class GamePage extends React.Component {
     
     constructor() {
         super()
-        this.deal_to_players = this.deal_to_players.bind(this);
+        this.deal_nine_cards = this.deal_nine_cards.bind(this);
         this.deal_random_card = this.deal_random_card.bind(this);
         this.get_card_img = this.get_card_img.bind(this);
-        this.state = {Ca1: "", Ca2: "", Ca3: ""}
+        this.state = {Ca1: "", Ca2: "", Ca3: "", P1: "", P2: ""}
     }
 
     componentWillMount(){
@@ -36,11 +36,15 @@ class GamePage extends React.Component {
                 var Car1 = snapshot.child("C1").val()
                 var Car2 = snapshot.child("C2").val()
                 var Car3 = snapshot.child("C3").val()
+                var PCar1 = snapshot.child("P1").val()
+                var PCar2 = snapshot.child("P2").val()
                 console.log("\n\n" + Car1);
                 this.setState({
                     Ca1: Car1,
                     Ca2: Car2,
-                    Ca3: Car3
+                    Ca3: Car3,
+                    P1: PCar1,
+                    P2: PCar2
                 })
             })
     }
@@ -57,6 +61,7 @@ class GamePage extends React.Component {
         fire.auth().signOut();
     }
 
+    
     deal_random_card() {
         var deck = ["1S", "2S", "3S", "4S", "5S", "6S", "7S", "8S", "9S", "10S", "JS", "QS", "KS",
                     "1H", "2H", "3H", "4H", "5H", "6H", "7H", "8H", "9H", "10H", "JH", "QH", "KH",
@@ -66,7 +71,8 @@ class GamePage extends React.Component {
         let imgsrc = images('./'+card+'.png');
         return <img src={imgsrc} style={{height: "10em", marginRight: '10px'}}/>
     }
-
+    
+    
     get_random_card() {
         var deck = ["1S", "2S", "3S", "4S", "5S", "6S", "7S", "8S", "9S", "10S", "JS", "QS", "KS",
                     "1H", "2H", "3H", "4H", "5H", "6H", "7H", "8H", "9H", "10H", "JH", "QH", "KH",
@@ -75,12 +81,16 @@ class GamePage extends React.Component {
         let card = deck[Math.floor(Math.random()*52)];
         return card;
     }
+    
 
     upload_flop(){
+        var nine = this.deal_nine_cards();
         fire.database().ref("/Root/GameID/flop").set({
-            C1: this.get_random_card(),
-            C2: this.get_random_card(),
-            C3: this.get_random_card()
+            C1: nine[0],
+            C2: nine[1],
+            C3: nine[2],
+            P1: nine[3],
+            P2: nine[4]
         })
     }
 
@@ -98,71 +108,80 @@ class GamePage extends React.Component {
         //initialize number of cards in the deck
         var cards_left = 52;
         //create data structure that hold all cards
-        var deck = ["S1", "S2", "S3", "S4", "S5", "S6", "S7", "S8", "S9", "S10", "S11", "S12", "S13",
-                    "H1", "H2", "H3", "H4", "H5", "H6", "H7", "H8", "H9", "H10", "H11", "H12", "H13",
-                    "D1", "D2", "D3", "D4", "D5", "D6", "D7", "D8", "D9", "D10", "D11", "D12", "D13",
-                    "C1", "C2", "C3", "C4", "C5", "C6", "C7", "C8", "C9", "C10", "C11", "C12", "C13"];
+        var deck = ["1S", "2S", "3S", "4S", "5S", "6S", "7S", "8S", "9S", "10S", "JS", "QS", "KS",
+                    "1H", "2H", "3H", "4H", "5H", "6H", "7H", "8H", "9H", "10H", "JH", "QH", "KH",
+                    "1D", "2D", "3D", "4D", "5D", "6D", "7D", "8D", "9D", "10D", "JD", "QD", "KD",
+                    "1C", "2C", "3C", "4C", "5C", "6C", "7C", "8C", "9C", "10C", "JC", "QC", "KC"];
         //create array of dealt cards
         var dealt_cards = ["temp1", "temp2", "temp3", "temp4", "temp5", "temp6", "temp7", "temp8", "temp9"];
+        var hash = new Object(); 
         //create random1, number between 1 and 52
         var random1 = Math.floor(Math.random() * 52);
         var card1 = deck[random1];
-        //add card1 to array of dealt cards
         dealt_cards[0] = card1;
+        hash["one"] = random1;
         //choose random2
         var random2 = Math.floor(Math.random() * 52);
-        while(random2 == random1){
-            random2 = Math.floor(Math.random() * 52);
+        while ((random2 in hash) == false){
+            var random2 = Math.floor(Math.random() * 52);
         }
+        hash["two"] = random2;
         var card2 = deck[random2];
         dealt_cards[1] = card2;
         //choose random3
         var random3 = Math.floor(Math.random() * 52);
-        while(random3 == random1 || random3 == random2){
+        while((random3 in hash) == false){
             random3 = Math.floor(Math.random() * 52);
         }
+        hash["three"] = random3;
         var card3 = deck[random3];
         dealt_cards[2] = card3;
         //choose random4
         var random4 = Math.floor(Math.random() * 52);
-        while(random4 == random1 || random4 == random2 || random4 == random3){
+        while((random4 in hash) == false){
             random4 = Math.floor(Math.random() * 52);
         }
+        hash["four"] = random3;
         var card4 = deck[random4];
         dealt_cards[3] = card4;
         //choose random5
         var random5 = Math.floor(Math.random() * 52);
-        while(random5 == random1 || random5 == random2 || random5 == random3 || random5 == random4){
+        while((random5 in hash) == false){
             random5 = Math.floor(Math.random() * 52);
         }
+        hash["five"] = random5;
         var card5 = deck[random5];
         dealt_cards[4] = card5;
         //choose random6
         var random6 = Math.floor(Math.random() * 52);
-        while(random6 == random1 || random6 == random2 || random6 == random3 || random6 == random4 || random6 == random5){
+        while((random6 in hash) == false){
             random6 = Math.floor(Math.random() * 52);
         }
+        hash["six"] = random6;
         var card6 = deck[random6];
         dealt_cards[5] = card6;
         //choose random7
         var random7 = Math.floor(Math.random() * 52);
-        while(random7 == random1 || random7 == random2 || random7 == random3 || random7 == random4 || random7 == random5 || random7 == random6){
+        while((random7 in hash) == false){
             random7 = Math.floor(Math.random() * 52);
         }
+        hash["seven"] = random7;
         var card7 = deck[random7];
         dealt_cards[6] = card7;
         //choose random8
         var random8 = Math.floor(Math.random() * 52);
-        while(random8 == random1 || random8 == random2 || random8 == random3 || random8 == random4 || random8 == random5 || random8 == random6 || random8 == random7){
+        while((random8 in hash) == false){
             random8 = Math.floor(Math.random() * 52);
         }
+        hash["eight"] = random8;
         var card8 = deck[random8];
         dealt_cards[7] = card8;
         //choose random9
         var random9 = Math.floor(Math.random() * 52);
-        while(random9 == random1 || random9 == random2 || random9 == random3 || random9 == random4 || random9 == random5 || random9 == random6 || random9 == random7 || random8){
+        while((random9 in hash) == false){
             random9 = Math.floor(Math.random() * 52);
         }
+        hash["nine"] = random9;
         var card9 = deck[random9];
         dealt_cards[8] = card9;
         //return dealt cards, as an array
@@ -184,8 +203,8 @@ class GamePage extends React.Component {
                 </div>
  
                 <div style={{display: 'flex', justifyContent: 'center', height: "100%", margin: '50px'}}>
-                    <img src={H6} style={{height: "10em", margin: '10px'}}/>
-                    <img src={H7} style={{height: "10em", margin: '10px'}}/>
+                    { this.get_card_img(this.state.P1) }
+                    { this.get_card_img(this.state.P2) }
  
                     <div style={{display: 'flex', justifyContent: 'center', height: "100%", flexDirection: 'column'}}>
                         <button style={{margin: '7px', marginTop: '15px'}} onClick={this.login}>CHECK</button>
