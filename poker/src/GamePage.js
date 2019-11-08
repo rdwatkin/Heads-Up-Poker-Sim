@@ -31,11 +31,52 @@ class GamePage extends React.Component {
     }
 
     componentWillMount(){
+        // Testing to connect two players
+        //var userId = prompt('Username?', 'Guest');
+        // Consider adding '/<unique id>' if you have multiple games.
+        //var gameRef = new Firebase('https://pleaseWork125.com/');
+       // this.WORK(userId);
+        
+
+    //   / var userId = prompt('Username?', 'Guest');
+    var userId = "asda"
+       var playerList = fire.database().ref("/Root/playerList/");
+           var temp1, temp2;
+           playerList.once('value', snapshot => {
+               temp1 = snapshot.child("P1").val();
+               temp2 = snapshot.child("P2").val();
+               console.log(temp1+ " " + temp2);
+           })
+           if(temp1 == null){
+            playerList.set({
+                   P1: userId,
+                   P2: null
+               })
+           }
+           else if(temp2 == null){
+               alert("yes")
+               playerList.set({
+                   P1: temp1,
+                   P2: userId
+               })
+           }
+           
+           
+   
+           playerList.transaction(function(curVal){
+              //alert((curVal || 0) + 1);
+           })
+        
+        
+
+        // ----------------------------------------
+
         this.upload_cards()
         //Get Cards From Database
         fire.database().ref("/Root/GameID/").once('value', snapshot => {
             var Player1 = fire.auth().currentUser;
             console.log("\n\n"+Player1.uid);
+            snapshot.child("C1").val()
             var Car1 = snapshot.child("C1").val()
             var Car2 = snapshot.child("C2").val()
             var Car3 = snapshot.child("C3").val()
@@ -58,6 +99,48 @@ class GamePage extends React.Component {
                 P2C2: P2Ca2
             })
         })
+    }
+
+    WORK(userId) {
+        var playerList = fire.database().ref("/Root/GameID/playerList/");
+        var myNum, inGame = false;
+
+        playerList.transaction(function(playerL){
+            if(playerL == null){
+                playerL = [];
+            }
+
+            // Check if the player is in the game already
+            for (var i = 0; i < playerL.length; i++) {
+                alert("check2");
+                if (playerL[i] == userId){
+                    inGame = true;
+                    myNum = i;
+                    return;
+                }
+            }
+
+            if(i < 2){
+                alert("check");
+                playerL[i] = userId;
+                myNum = i;
+                return playerL;
+            }
+            myNum = null;
+        }, function (error, committed){
+            if(committed || inGame){
+                // play the game
+                alert(myNum);
+                //var pd = fire.database().ref("/Root/GameID/playerList/");
+                if(!inGame){
+                    alert("signing in");
+                    playerList.child(myNum).set({userId: userId, state: 'game state'});
+                }
+            }
+            else{
+                alert("failed");
+            }
+        });
     }
     
     upload_value_to_database(path, name, value){
