@@ -22,37 +22,48 @@ const images = require.context('./images', true);
 
 class GamePage extends React.Component {
     
+    /* Bind Functions to Namespace */
     constructor() {
         super()
-        this.deal_nine_cards = this.deal_nine_cards.bind(this);
-        this.deal_random_card = this.deal_random_card.bind(this);
         this.get_card_img = this.get_card_img.bind(this);
-        this.state = {Ca1: "", Ca2: "", Ca3: "", P1: "", P2: ""}
+        this.state = {Ca1: "", Ca2: "", Ca3: "", Ca4: "", Ca5: "",
+                      P1C1: "", P1C2: "", P2C1: "", P2C2: "" }
     }
 
     componentWillMount(){
-        this.upload_flop()
-        fire.database().ref("/Root/GameID/flop").once('value', snapshot => {
-                var Car1 = snapshot.child("C1").val()
-                var Car2 = snapshot.child("C2").val()
-                var Car3 = snapshot.child("C3").val()
-                var PCar1 = snapshot.child("P1").val()
-                var PCar2 = snapshot.child("P2").val()
-                console.log("\n\n" + Car1);
-                this.setState({
-                    Ca1: Car1,
-                    Ca2: Car2,
-                    Ca3: Car3,
-                    P1: PCar1,
-                    P2: PCar2
-                })
+        this.upload_cards()
+        //Get Cards From Database
+        fire.database().ref("/Root/GameID/").once('value', snapshot => {
+            var Player1 = fire.auth().currentUser;
+            console.log("\n\n"+Player1.uid);
+            var Car1 = snapshot.child("C1").val()
+            var Car2 = snapshot.child("C2").val()
+            var Car3 = snapshot.child("C3").val()
+            var Car4 = snapshot.child("C4").val()
+            var Car5 = snapshot.child("C5").val()
+            var P1Ca1 = snapshot.child("P1C1").val()
+            var P1Ca2 = snapshot.child("P1C2").val()
+            var P2Ca1 = snapshot.child("P2C1").val()
+            var P2Ca2 = snapshot.child("P2C2").val()
+            /* Set State Variables */
+            this.setState({
+                Ca1: Car1,
+                Ca2: Car2,
+                Ca3: Car3,
+                Ca4: Car4,
+                Ca5: Car5,
+                P1C1: P1Ca1,
+                P1C2: P1Ca2,
+                P2C1: P2Ca1,
+                P2C2: P2Ca2
             })
+        })
     }
     
-    upload_card_to_database(path, name, card){
+    upload_value_to_database(path, name, value){
         return function() {
             fire.database().ref(path).set({
-                name: card
+                name: value
             });
         }
     }
@@ -61,37 +72,45 @@ class GamePage extends React.Component {
         fire.auth().signOut();
     }
 
-    
-    deal_random_card() {
-        var deck = ["1S", "2S", "3S", "4S", "5S", "6S", "7S", "8S", "9S", "10S", "JS", "QS", "KS",
-                    "1H", "2H", "3H", "4H", "5H", "6H", "7H", "8H", "9H", "10H", "JH", "QH", "KH",
-                    "1D", "2D", "3D", "4D", "5D", "6D", "7D", "8D", "9D", "10D", "JD", "QD", "KD",
-                    "1C", "2C", "3C", "4C", "5C", "6C", "7C", "8C", "9C", "10C", "JC", "QC", "KC"];
-        let card = deck[Math.floor(Math.random()*52)];
-        let imgsrc = images('./'+card+'.png');
-        return <img src={imgsrc} style={{height: "10em", marginRight: '10px'}}/>
+    remove_card(deck, index){
+        for(var i = index; i <= 52; i++ ){
+            deck[i] = deck[i+1];
+        }
     }
-    
-    
-    get_random_card() {
+
+    deal_nine_cards(){
+        var cards_left = 52;
+        var dealt_cards = new Array(10);
         var deck = ["1S", "2S", "3S", "4S", "5S", "6S", "7S", "8S", "9S", "10S", "JS", "QS", "KS",
                     "1H", "2H", "3H", "4H", "5H", "6H", "7H", "8H", "9H", "10H", "JH", "QH", "KH",
                     "1D", "2D", "3D", "4D", "5D", "6D", "7D", "8D", "9D", "10D", "JD", "QD", "KD",
                     "1C", "2C", "3C", "4C", "5C", "6C", "7C", "8C", "9C", "10C", "JC", "QC", "KC"];
-        let card = deck[Math.floor(Math.random()*52)];
-        return card;
+        var card;
+        var index;
+        for(var i=0; i<9; i++){
+            index = Math.floor(Math.random()*cards_left);
+            dealt_cards[i] = deck[index];
+            this.remove_card(deck, index);
+            cards_left--;
+        }
+        return dealt_cards;
     }
     
 
-    upload_flop(){
-        var nine = this.deal_nine_cards();
-        fire.database().ref("/Root/GameID/flop").set({
-            C1: nine[0],
-            C2: nine[1],
-            C3: nine[2],
-            P1: nine[3],
-            P2: nine[4]
+    upload_cards(){
+        var cards_dealt = this.deal_nine_cards();
+        fire.database().ref("/Root/GameID/").set({
+                C1: cards_dealt[0],
+                C2: cards_dealt[1],
+                C3: cards_dealt[2],
+                C4: cards_dealt[3],
+                C5: cards_dealt[4],
+                P1C1: cards_dealt[5],
+                P1C2: cards_dealt[6],
+                P2C1: cards_dealt[7],
+                P2C2: cards_dealt[8]
         })
+        fire.database().ref()
     }
 
     get_card_img(card){
@@ -101,110 +120,131 @@ class GamePage extends React.Component {
         let imgsrc = images('./'+card+'.png');
         return <img src={imgsrc} style={{height: "10em", marginRight: '10px'}}/>;
     }
-    
-    //deal function, randomly choose a card to assign.
-    //returns arary of 9 cards
-    deal_nine_cards() {
-        //initialize number of cards in the deck
-        var cards_left = 52;
-        //create data structure that hold all cards
-        var deck = ["1S", "2S", "3S", "4S", "5S", "6S", "7S", "8S", "9S", "10S", "JS", "QS", "KS",
-                    "1H", "2H", "3H", "4H", "5H", "6H", "7H", "8H", "9H", "10H", "JH", "QH", "KH",
-                    "1D", "2D", "3D", "4D", "5D", "6D", "7D", "8D", "9D", "10D", "JD", "QD", "KD",
-                    "1C", "2C", "3C", "4C", "5C", "6C", "7C", "8C", "9C", "10C", "JC", "QC", "KC"];
-        //create array of dealt cards
-        var dealt_cards = ["temp1", "temp2", "temp3", "temp4", "temp5", "temp6", "temp7", "temp8", "temp9"];
-        var hash = new Object(); 
-        //create random1, number between 1 and 52
-        var random1 = Math.floor(Math.random() * 52);
-        var card1 = deck[random1];
-        dealt_cards[0] = card1;
-        hash["one"] = random1;
-        //choose random2
-        var random2 = Math.floor(Math.random() * 52);
-        while ((random2 in hash) == false){
-            var random2 = Math.floor(Math.random() * 52);
+
+
+
+    //main, control action of the game: whos turn, pot size/winner, flips cards when needed
+    game_control() {
+        //initialize variables
+        var gameover = false;
+        var action_complete = false;
+        var pot = 0;
+        var P1chips = 1000;
+        var P2chips = 1000;
+        var smallblind = "start";
+        var bigblind = "temp";
+        //while niether player has 0 chips
+        while (gameover == false) {
+            //switch blinds
+            if (smallblind == "P1"){
+                smallblind = "P2";
+            } else {
+                smallblind = "P1";
+            }
+            //remove blinds from players: 25 for small blind, 50 for big blind
+            if (smallblind == "P1"){
+                P1chips -= 25;
+                P2chips -= 50;
+                //update on display
+                
+            } else {
+                P1chips -= 50;
+                P2chips -= 25;
+                //update on display
+
+            }
+            //add blinds to the pot
+            pot = 75;
+            //update on display
+
+            //show each player their cards, while having opponets flipped
+
+            while(action_complete == false){
+                //Allow small blind to have action
+            
+
+                //Give Big blind action
+                
+            }
+            //reset action_complete
+            action_complete = false;
+
+
+            //When action is complete, show flop to both players
+
+
+            while(action_complete == false){
+                //Allow small blind to have action
+            
+
+                //Give Big blind action
+                
+            }
+            //reset action_complete
+            action_complete = false;
+            //when action is complete, show turn to both players
+
+
+            while(action_complete == false){
+                //Allow small blind to have action
+            
+
+                //Give Big blind action
+                
+            }
+            //reset action_complete
+            action_complete = false;
+            //when action is complete, show river to both players
+
+            
+
+
+            while(action_complete == false){
+                //Allow small blind to have action
+            
+
+                //Give Big blind action
+                
+            }
+            //reset action_complete
+            action_complete = false;
+            //When action is complete, show both players cards, and award pot to winner. Reset
+
+
+            //call function to determine winner
+
+
+            //Determine if game is over
+            if (P1chips == 0 || P2chips == 0){
+                gameover = true;
+            }
         }
-        hash["two"] = random2;
-        var card2 = deck[random2];
-        dealt_cards[1] = card2;
-        //choose random3
-        var random3 = Math.floor(Math.random() * 52);
-        while((random3 in hash) == false){
-            random3 = Math.floor(Math.random() * 52);
-        }
-        hash["three"] = random3;
-        var card3 = deck[random3];
-        dealt_cards[2] = card3;
-        //choose random4
-        var random4 = Math.floor(Math.random() * 52);
-        while((random4 in hash) == false){
-            random4 = Math.floor(Math.random() * 52);
-        }
-        hash["four"] = random3;
-        var card4 = deck[random4];
-        dealt_cards[3] = card4;
-        //choose random5
-        var random5 = Math.floor(Math.random() * 52);
-        while((random5 in hash) == false){
-            random5 = Math.floor(Math.random() * 52);
-        }
-        hash["five"] = random5;
-        var card5 = deck[random5];
-        dealt_cards[4] = card5;
-        //choose random6
-        var random6 = Math.floor(Math.random() * 52);
-        while((random6 in hash) == false){
-            random6 = Math.floor(Math.random() * 52);
-        }
-        hash["six"] = random6;
-        var card6 = deck[random6];
-        dealt_cards[5] = card6;
-        //choose random7
-        var random7 = Math.floor(Math.random() * 52);
-        while((random7 in hash) == false){
-            random7 = Math.floor(Math.random() * 52);
-        }
-        hash["seven"] = random7;
-        var card7 = deck[random7];
-        dealt_cards[6] = card7;
-        //choose random8
-        var random8 = Math.floor(Math.random() * 52);
-        while((random8 in hash) == false){
-            random8 = Math.floor(Math.random() * 52);
-        }
-        hash["eight"] = random8;
-        var card8 = deck[random8];
-        dealt_cards[7] = card8;
-        //choose random9
-        var random9 = Math.floor(Math.random() * 52);
-        while((random9 in hash) == false){
-            random9 = Math.floor(Math.random() * 52);
-        }
-        hash["nine"] = random9;
-        var card9 = deck[random9];
-        dealt_cards[8] = card9;
-        //return dealt cards, as an array
-        return dealt_cards;
+        //game is over
+
     }
+
+
+
  
     render() {
         return (
             <div>
                 <div style={{display: 'flex', justifyContent: 'center', height: "50%", margin: '50px'}}>
-                    <img src={back} style={{height: "10em", margin: '10px'}}/>
-                    <img src={back} style={{height: "10em", margin: '10px'}}/>
+                    { this.get_card_img(this.state.P2C1) }
+                    { this.get_card_img(this.state.P2C2) }
                 </div>
  
                 <div style={{display: 'flex', justifyContent: 'center', height: "50%", margin: '10px'}}>
                     { this.get_card_img(this.state.Ca1) }
                     { this.get_card_img(this.state.Ca2) }
                     { this.get_card_img(this.state.Ca3) }
+                    { this.get_card_img(this.state.Ca4) }
+                    { this.get_card_img(this.state.Ca5) }
                 </div>
  
                 <div style={{display: 'flex', justifyContent: 'center', height: "100%", margin: '50px'}}>
-                    { this.get_card_img(this.state.P1) }
-                    { this.get_card_img(this.state.P2) }
+                    { this.get_card_img(this.state.P1C1) }
+                    { this.get_card_img(this.state.P1C2) }
  
                     <div style={{display: 'flex', justifyContent: 'center', height: "100%", flexDirection: 'column'}}>
                         <button style={{margin: '7px', marginTop: '15px'}} onClick={this.login}>CHECK</button>
