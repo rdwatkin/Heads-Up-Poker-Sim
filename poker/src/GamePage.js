@@ -42,7 +42,7 @@ class GamePage extends React.Component {
     var userId = "asda"
        var playerList = fire.database().ref("/Root/playerList/");
            var temp1, temp2;
-           playerList.once('value', snapshot => {
+           playerList.on('value', snapshot => {
                temp1 = snapshot.child("P1").val();
                temp2 = snapshot.child("P2").val();
                console.log(temp1+ " " + temp2);
