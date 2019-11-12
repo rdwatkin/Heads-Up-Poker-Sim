@@ -21,14 +21,18 @@ import S13 from './images/KS.png';  import H13 from './images/KH.png';  import D
 const images = require.context('./images', true);
 
 class GamePage extends React.Component {
-    
+
+
     /* Bind Functions to Namespace */
     constructor() {
         super()
         this.get_card_img = this.get_card_img.bind(this);
         this.state = {Ca1: "", Ca2: "", Ca3: "", Ca4: "", Ca5: "",
-                      P1C1: "", P1C2: "", P2C1: "", P2C2: "" }
+                      P1C1: "", P1C2: "", P2C1: "", P2C2: "", P1chips: "",
+                      P2chips: "", pot: ""}
     }
+
+    
 
     componentWillMount(){
         //Get Cards From Database
@@ -41,6 +45,8 @@ class GamePage extends React.Component {
             var Car5 = snapshot.child("C5").val()
             var P1Ca1 = snapshot.child(currUser).child("C1").val()
             var P1Ca2 = snapshot.child(currUser).child("C2").val()
+            //var Player1chips = 100;
+            //var Player2chips = 100;
             /* Set State Variables */
             this.setState({
                 Ca1: Car1,
@@ -50,6 +56,9 @@ class GamePage extends React.Component {
                 Ca5: Car5,
                 P1C1: P1Ca1,
                 P1C2: P1Ca2,
+                P1chips: 1000,
+                P2chips: 1000,
+                pot: 0,
             })
         })
     }
@@ -74,6 +83,9 @@ class GamePage extends React.Component {
         return <img src={imgsrc} style={{height: "10em", marginRight: '10px'}}/>;
     }
 
+
+
+/*
     get_value(card){
         var val = card.slice(0, card.length);
         if(val == "1")
@@ -115,6 +127,7 @@ class GamePage extends React.Component {
             return false;
         }
     }
+
 
     full_house_check(current_cards){
         var reverse_sorted_hand = current_cards.sort(function(a, b) {return b-a;}); //Reverse sort to find the highest triple/pair first
@@ -173,14 +186,15 @@ class GamePage extends React.Component {
     }
 
 
+
     //main, control action of the game: whos turn, pot size/winner, flips cards when needed
     game_control() {
         //initialize variables
         var gameover = false;
         var action_complete = false;
         var pot = 0;
-        var P1chips = 1000;
-        var P2chips = 1000;
+        //var P1chips = 1000;
+        //var P2chips = 1000;
         var smallblind = "start";
         var bigblind = "temp";
         //while niether player has 0 chips
@@ -193,22 +207,23 @@ class GamePage extends React.Component {
             }
             //remove blinds from players: 25 for small blind, 50 for big blind
             if (smallblind == "P1"){
-                P1chips -= 25;
-                P2chips -= 50;
+                this.state.P1chips -= 25;
+                this.state.P2chips -= 50;
                 //update on display
                 
             } else {
-                P1chips -= 50;
-                P2chips -= 25;
+                this.state.P1chips -= 50;
+                this.state.P2chips -= 25;
                 //update on display
 
             }
             //add blinds to the pot
-            pot = 75;
+            this.state.pot = 75;
             //update on display
 
             //show each player their cards, while having opponets flipped
 
+//Pre Flop            
             while(action_complete == false){
                 //Allow small blind to have action
             
@@ -223,6 +238,7 @@ class GamePage extends React.Component {
             //When action is complete, show flop to both players
 
 
+//Flop            
             while(action_complete == false){
                 //Allow small blind to have action
             
@@ -233,7 +249,7 @@ class GamePage extends React.Component {
             action_complete = false;
             //when action is complete, show turn to both players
 
-
+//Turn
             while(action_complete == false){
                 //Allow small blind to have action
             
@@ -247,7 +263,7 @@ class GamePage extends React.Component {
 
             
 
-
+//River
             while(action_complete == false){
                 //Allow small blind to have action
             
@@ -264,7 +280,7 @@ class GamePage extends React.Component {
 
 
             //Determine if game is over
-            if (P1chips == 0 || P2chips == 0){
+            if (this.state.P1chips == 0 || this.state.P2chips == 0){
                 gameover = true;
             }
         }
@@ -277,13 +293,13 @@ class GamePage extends React.Component {
             <div>
                 <div style={{display: 'flex', justifyContent: 'center', height: "50%", margin: '50px'}}>
                     <h1 style={{textAlign: "center", margin: '30px', marginLeft: '210px'}}>
-                        Opponent Stack<br/> 1000</h1>
+                        Opponent Stack<br/> {this.state.P2chips} </h1>
                     { this.get_card_img("back") }
                     { this.get_card_img("back") }
                 </div>
  
                 <div style={{display: 'flex', justifyContent: 'center', height: "50%", margin: '10px'}}>
-                    <h1 style={{textAlign: "center", margin: '30px'}}>Pot<br/> 55</h1>
+                <h1 style={{textAlign: "center", margin: '30px'}}>Pot<br/> {this.state.pot}</h1>
                     { this.get_card_img(this.state.Ca1) }
                     { this.get_card_img(this.state.Ca2) }
                     { this.get_card_img(this.state.Ca3) }
@@ -293,7 +309,7 @@ class GamePage extends React.Component {
  
                 <div style={{display: 'flex', justifyContent: 'center', height: "100%", margin: '50px'}}>
                     <h1 style={{textAlign: "center", margin: '30px', marginLeft: '300px'}}>
-                        My Stack<br/> 1000</h1>
+                        My Stack<br/> {this.state.P1chips} </h1>
                     { this.get_card_img(this.state.P1C1) }
                     { this.get_card_img(this.state.P1C2) }
  
