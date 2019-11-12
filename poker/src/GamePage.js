@@ -31,20 +31,16 @@ class GamePage extends React.Component {
     }
 
     componentWillMount(){
-        this.upload_cards()
         //Get Cards From Database
         fire.database().ref("/Root/GameID/").once('value', snapshot => {
-            var Player1 = fire.auth().currentUser;
-            console.log("\n\n"+Player1.uid);
+            var currUser = fire.auth().currentUser.uid;
             var Car1 = snapshot.child("C1").val()
             var Car2 = snapshot.child("C2").val()
             var Car3 = snapshot.child("C3").val()
             var Car4 = snapshot.child("C4").val()
             var Car5 = snapshot.child("C5").val()
-            var P1Ca1 = snapshot.child("P1C1").val()
-            var P1Ca2 = snapshot.child("P1C2").val()
-            var P2Ca1 = snapshot.child("P2C1").val()
-            var P2Ca2 = snapshot.child("P2C2").val()
+            var P1Ca1 = snapshot.child(currUser).child("C1").val()
+            var P1Ca2 = snapshot.child(currUser).child("C2").val()
             /* Set State Variables */
             this.setState({
                 Ca1: Car1,
@@ -54,12 +50,10 @@ class GamePage extends React.Component {
                 Ca5: Car5,
                 P1C1: P1Ca1,
                 P1C2: P1Ca2,
-                P2C1: P2Ca1,
-                P2C2: P2Ca2
             })
         })
     }
-    
+
     upload_value_to_database(path, name, value){
         return function() {
             fire.database().ref(path).set({
@@ -72,56 +66,19 @@ class GamePage extends React.Component {
         fire.auth().signOut();
     }
 
-    remove_card(deck, index){
-        for(var i = index; i <= 52; i++ ){
-            deck[i] = deck[i+1];
-        }
-    }
-
-    deal_nine_cards(){
-        var cards_left = 52;
-        var dealt_cards = new Array(10);
-        var deck = ["1S", "2S", "3S", "4S", "5S", "6S", "7S", "8S", "9S", "10S", "JS", "QS", "KS",
-                    "1H", "2H", "3H", "4H", "5H", "6H", "7H", "8H", "9H", "10H", "JH", "QH", "KH",
-                    "1D", "2D", "3D", "4D", "5D", "6D", "7D", "8D", "9D", "10D", "JD", "QD", "KD",
-                    "1C", "2C", "3C", "4C", "5C", "6C", "7C", "8C", "9C", "10C", "JC", "QC", "KC"];
-        var card;
-        var index;
-        for(var i=0; i<9; i++){
-            index = Math.floor(Math.random()*cards_left);
-            dealt_cards[i] = deck[index];
-            this.remove_card(deck, index);
-            cards_left--;
-        }
-        return dealt_cards;
-    }
-    
-
-    upload_cards(){
-        var cards_dealt = this.deal_nine_cards();
-        fire.database().ref("/Root/GameID/").set({
-                C1: cards_dealt[0],
-                C2: cards_dealt[1],
-                C3: cards_dealt[2],
-                C4: cards_dealt[3],
-                C5: cards_dealt[4],
-                P1C1: cards_dealt[5],
-                P1C2: cards_dealt[6],
-                P2C1: cards_dealt[7],
-                P2C2: cards_dealt[8]
-        })
-        fire.database().ref()
-    }
-
     get_card_img(card){
         if (card == ""){
-            card = "1S";
+            card = "back";
         }
         let imgsrc = images('./'+card+'.png');
         return <img src={imgsrc} style={{height: "10em", marginRight: '10px'}}/>;
     }
 
-
+    get_value(card){
+        var val = card.slice(0, card.length);
+        var suit = card.slice(card.length-1, card.length);
+        return [parseInt(val), suit];
+    }
 
     //main, control action of the game: whos turn, pot size/winner, flips cards when needed
     game_control() {
@@ -176,7 +133,6 @@ class GamePage extends React.Component {
             while(action_complete == false){
                 //Allow small blind to have action
             
-
                 //Give Big blind action
                 
             }
@@ -223,18 +179,18 @@ class GamePage extends React.Component {
 
     }
 
-
-
- 
     render() {
         return (
             <div>
                 <div style={{display: 'flex', justifyContent: 'center', height: "50%", margin: '50px'}}>
-                    { this.get_card_img(this.state.P2C1) }
-                    { this.get_card_img(this.state.P2C2) }
+                    <h1 style={{textAlign: "center", margin: '30px', marginLeft: '210px'}}>
+                        Opponent Stack<br/> 1000</h1>
+                    { this.get_card_img("back") }
+                    { this.get_card_img("back") }
                 </div>
  
                 <div style={{display: 'flex', justifyContent: 'center', height: "50%", margin: '10px'}}>
+                    <h1 style={{textAlign: "center", margin: '30px'}}>Pot<br/> 55</h1>
                     { this.get_card_img(this.state.Ca1) }
                     { this.get_card_img(this.state.Ca2) }
                     { this.get_card_img(this.state.Ca3) }
@@ -243,6 +199,8 @@ class GamePage extends React.Component {
                 </div>
  
                 <div style={{display: 'flex', justifyContent: 'center', height: "100%", margin: '50px'}}>
+                    <h1 style={{textAlign: "center", margin: '30px', marginLeft: '300px'}}>
+                        My Stack<br/> 1000</h1>
                     { this.get_card_img(this.state.P1C1) }
                     { this.get_card_img(this.state.P1C2) }
  
