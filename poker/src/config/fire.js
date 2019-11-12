@@ -1,14 +1,14 @@
 import firebase from 'firebase';
 
 const firebaseConfig = {
-  apiKey: "AIzaSyAw9YAx7EpsbS4k6yekKraB4K7cDAi9594",
-  authDomain: "react-test-140de.firebaseapp.com",
-  databaseURL: "https://react-test-140de.firebaseio.com",
-  projectId: "react-test-140de",
-  storageBucket: "react-test-140de.appspot.com",
-  messagingSenderId: "30598900398",
-  appId: "1:30598900398:web:e764475f292902a0195b3f",
-  measurementId: "G-79MDBLWZYY"
+  apiKey: "AIzaSyDKHg3Do27Yf1UUCtBpJma17tFPmaV9RJU",
+  authDomain: "ygigiu-516ca.firebaseapp.com",
+  databaseURL: "https://ygigiu-516ca.firebaseio.com",
+  projectId: "ygigiu-516ca",
+  storageBucket: "ygigiu-516ca.appspot.com",
+  messagingSenderId: "610036309890",
+  appId: "1:610036309890:web:ef99aa059ecee0ad18399b",
+  measurementId: "G-JTNXZV7H35"
 };
 
   const fire = firebase.initializeApp(firebaseConfig);
