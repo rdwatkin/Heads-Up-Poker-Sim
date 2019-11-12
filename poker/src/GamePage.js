@@ -92,20 +92,20 @@ class GamePage extends React.Component {
     }
 
     hand_check(){
-        var hand = [Ca1, Ca2, Ca3, Ca4, Ca5, P1C1, P1C2];
-        if(royal_flush_check(hand)){
+        var hand = [this.state.Ca1, this.state.Ca2, this.state.Ca3, this.state.Ca4, this.state.Ca5, this.state.P1C1, this.state.P1C2];
+        if(this.royal_flush_check(hand)){
             return "royal flush";
         }
     }
 
     royal_flush_check(current_cards){
-        royals_check = false;
-        same_suit_check = false
-        sorted_hand = current_cards.sort(function(a, b) {return a-b;});
-        if(get_value(sorted_hand[3]) == 10 && get_value(sorted_hand[4]) == 11 && get_value(sorted_hand[5]) == 12 && get_value(sorted_hand[6]) == 13 && get_value(sorted_hand[7]) == 14){
+        var royals_check = false;
+        var same_suit_check = false
+        var sorted_hand = current_cards.sort(function(a, b) {return a-b;});
+        if(this.get_value(sorted_hand[2]) == 10 && this.get_value(sorted_hand[3]) == 11 && this.get_value(sorted_hand[4]) == 12 && this.get_value(sorted_hand[5]) == 13 && this.get_value(sorted_hand[6]) == 14){
             royals_check = true;
         }
-        if(get_suit(sorted_hand[3]) == get_suit(sorted_hand[4]) == get_suit(sorted_hand[5]) == get_suit(sorted_hand[6]) == get_suit(sorted_hand[7])){
+        if(this.get_suit(sorted_hand[2]) == this.get_suit(sorted_hand[3]) == this.get_suit(sorted_hand[4]) == this.get_suit(sorted_hand[5]) == this.get_suit(sorted_hand[6])){
             same_suit_check = true;
         } 
         if(royals_check == true && same_suit_check == true){
@@ -117,26 +117,26 @@ class GamePage extends React.Component {
     }
 
     full_house_check(current_cards){
-        reverse_sorted_hand = current_cards.sort(function(a, b) {return b-a;}); //Reverse sort to find the highest triple/pair first
-        triple_check = false;
-        pair_check = false;
-        triple_count = 0;
-        triple_value = 0;
-        double_count = 0;
-        double_value = 0;
-        int temp = 0;
+        var reverse_sorted_hand = current_cards.sort(function(a, b) {return b-a;}); //Reverse sort to find the highest triple/pair first
+        var triple_check = false;
+        var pair_check = false;
+        var triple_count = 0;
+        var triple_value = 0;
+        var double_count = 0;
+        var double_value = 0;
+        var temp = 0;
         //Check for the highest triple
-        for(int i = 0; i < 7; i++){
-            if(temp == get_value(reverse_sorted_hand[i])){
+        for(var i = 0; i < 7; i++){
+            if(temp == this.get_value(reverse_sorted_hand[i])){
                 triple_count++;
                 if(triple_count == 3){
                     triple_check = true;
-                    triple_value = get_value(reverse_sorted_hand[i])
+                    triple_value = this.get_value(reverse_sorted_hand[i])
                     break;
                 }
             }
             else{
-                temp = get_value(reverse_sorted_hand[i]);
+                temp = this.get_value(reverse_sorted_hand[i]);
                 triple_count = 1;
             }
         }
@@ -145,23 +145,23 @@ class GamePage extends React.Component {
         }
         //Check for the highest double, make sure not to count the triple cards though
         temp = 0;
-        for(int i = 0; i < 7; i++){
-            if(temp == get_value(reverse_sorted_hand[i])){
+        for(var i = 0; i < 7; i++){
+            if(temp == this.get_value(reverse_sorted_hand[i])){
                 double_count++;
                 if(double_count == 2){
-                    if(get_value(reverse_sorted_hand[i] == triple_value){
+                    if(this.get_value(reverse_sorted_hand[i] == triple_value)){
                         double_count = 1;
                         i++;
                     }
                     else{
                         pair_check = true;
-                        double_value = get_value(reverse_sorted_hand[i])
+                        double_value = this.get_value(reverse_sorted_hand[i])
                         break;
                     }
                 }
             }
             else{
-                temp = get_value(reverse_sorted_hand[i]);
+                this.temp = this.get_value(reverse_sorted_hand[i]);
                 double_count = 1;
             }
 
