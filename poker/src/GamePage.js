@@ -75,7 +75,6 @@ class GamePage extends React.Component {
     }
 
 
-
     //main, control action of the game: whos turn, pot size/winner, flips cards when needed
     game_control() {
         //initialize variables
@@ -129,7 +128,6 @@ class GamePage extends React.Component {
             while(action_complete == false){
                 //Allow small blind to have action
             
-
                 //Give Big blind action
                 
             }
@@ -180,11 +178,14 @@ class GamePage extends React.Component {
         return (
             <div>
                 <div style={{display: 'flex', justifyContent: 'center', height: "50%", margin: '50px'}}>
+                    <h1 style={{textAlign: "center", margin: '30px', marginLeft: '210px'}}>
+                        Opponent Stack<br/> 1000</h1>
                     { this.get_card_img("back") }
                     { this.get_card_img("back") }
                 </div>
  
                 <div style={{display: 'flex', justifyContent: 'center', height: "50%", margin: '10px'}}>
+                    <h1 style={{textAlign: "center", margin: '30px'}}>Pot<br/> 55</h1>
                     { this.get_card_img(this.state.Ca1) }
                     { this.get_card_img(this.state.Ca2) }
                     { this.get_card_img(this.state.Ca3) }
@@ -193,6 +194,8 @@ class GamePage extends React.Component {
                 </div>
  
                 <div style={{display: 'flex', justifyContent: 'center', height: "100%", margin: '50px'}}>
+                    <h1 style={{textAlign: "center", margin: '30px', marginLeft: '300px'}}>
+                        My Stack<br/> 1000</h1>
                     { this.get_card_img(this.state.P1C1) }
                     { this.get_card_img(this.state.P1C2) }
  
