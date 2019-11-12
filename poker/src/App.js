@@ -1,8 +1,9 @@
 import React, {Component } from 'react';
 import Home from './Home.js';
 import Login from './Login.js';
-import GamePage from './GamePage.js';
+import PlayerSelect from './playerSelect.js';
 import fire from './config/fire';
+import Router from './Router.js'
 
 class App extends Component {
   constructor(props) {
@@ -35,7 +36,7 @@ class App extends Component {
   render() {
     return (
       <div>
-        {this.state.user ? (<GamePage/>) : (<Login/>)}
+        {this.state.user ? (<Router/>) : (<Login/>)}
       </div>
     );
   }
