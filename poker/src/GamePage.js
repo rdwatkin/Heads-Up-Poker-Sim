@@ -27,11 +27,12 @@ class GamePage extends React.Component {
         super()
         this.get_card_img = this.get_card_img.bind(this);
         this.state = {Ca1: "", Ca2: "", Ca3: "", Ca4: "", Ca5: "",
-                      P1C1: "", P1C2: "", P2C1: "", P2C2: "" }
+                      P1C1: "", P1C2: "", P2C1: "", P2C2: "", currTurn: "" }
     }
 
     componentWillMount(){
         this.upload_cards()
+        //this.set_turn()
         //Get Cards From Database
         fire.database().ref("/Root/GameID/").once('value', snapshot => {
             var Player1 = fire.auth().currentUser;
@@ -45,6 +46,7 @@ class GamePage extends React.Component {
             var P1Ca2 = snapshot.child("P1C2").val()
             var P2Ca1 = snapshot.child("P2C1").val()
             var P2Ca2 = snapshot.child("P2C2").val()
+            var Fturn = snapshot.child("currTurn").val()
             /* Set State Variables */
             this.setState({
                 Ca1: Car1,
@@ -55,7 +57,8 @@ class GamePage extends React.Component {
                 P1C1: P1Ca1,
                 P1C2: P1Ca2,
                 P2C1: P2Ca1,
-                P2C2: P2Ca2
+                P2C2: P2Ca2,
+                currTurn: Fturn
             })
         })
     }
@@ -95,9 +98,8 @@ class GamePage extends React.Component {
         }
         return dealt_cards;
     }
-    
-
     upload_cards(){
+        var whos_turn = "Player 1"
         var cards_dealt = this.deal_nine_cards();
         fire.database().ref("/Root/GameID/").set({
                 C1: cards_dealt[0],
@@ -108,7 +110,8 @@ class GamePage extends React.Component {
                 P1C1: cards_dealt[5],
                 P1C2: cards_dealt[6],
                 P2C1: cards_dealt[7],
-                P2C2: cards_dealt[8]
+                P2C2: cards_dealt[8],
+                currTurn: whos_turn
         })
         fire.database().ref()
     }
@@ -121,6 +124,37 @@ class GamePage extends React.Component {
         return <img src={imgsrc} style={{height: "10em", marginRight: '10px'}}/>;
     }
 
+    update_turn(){
+        var turn = this.state.currTurn;
+        if(turn == "Player 1"){
+            var newTurn = "Player 2";
+            fire.database().ref("/Root/GameID/").update({
+                currTurn: newTurn
+            })
+            fire.database().ref()
+            this.setState({
+                currTurn: newTurn
+            })
+        }
+        else{
+            var newTurn = "Player 1";
+            fire.database().ref("/Root/GameID/").update({
+                currTurn: newTurn
+            })
+            fire.database().ref()
+            this.setState({
+                currTurn: newTurn
+            })
+        }
+        //fire.database().ref("/Root/GameID/").once('value', snapshot => {
+        //    var Player1 = fire.auth().currentUser;
+        //    var Fturn = snapshot.child("currTurn").val()
+        //    this.setState({
+        //        currTurn: Fturn
+        //    })
+        //})
+        
+    }
 
 
     //main, control action of the game: whos turn, pot size/winner, flips cards when needed
@@ -230,6 +264,9 @@ class GamePage extends React.Component {
         return (
             <div>
                 <div style={{display: 'flex', justifyContent: 'center', height: "50%", margin: '50px'}}>
+                    <h1>It is {this.state.currTurn}'s turn</h1>
+                </div>
+                <div style={{display: 'flex', justifyContent: 'center', height: "50%", margin: '50px'}}>
                     { this.get_card_img(this.state.P2C1) }
                     { this.get_card_img(this.state.P2C2) }
                 </div>
@@ -247,11 +284,11 @@ class GamePage extends React.Component {
                     { this.get_card_img(this.state.P1C2) }
  
                     <div style={{display: 'flex', justifyContent: 'center', height: "100%", flexDirection: 'column'}}>
-                        <button style={{margin: '7px', marginTop: '15px'}} onClick={this.login}>CHECK</button>
-                        <button style={{margin: '7px'}} onClick={this.deal_to_players}>BET</button>
-                        <button style={{margin: '7px'}} onClick={this.login}>RAISE</button>
-                        <button style={{margin: '7px'}} onClick={this.login}>CALL</button>
-                        <button style={{margin: '7px'}} onClick={this.login}>FOLD</button>
+                        <button style={{margin: '7px', marginTop: '15px'}} onClick={() => {this.update_turn()}}>CHECK</button>
+                        <button style={{margin: '7px'}} onClick={() => {this.update_turn()}}>BET</button>
+                        <button style={{margin: '7px'}} onClick={() => {this.update_turn()}}>RAISE</button>
+                        <button style={{margin: '7px'}} onClick={() => {this.update_turn()}}>CALL</button>
+                        <button style={{margin: '7px'}} onClick={() => {this.update_turn()}}>FOLD</button>
                     </div>
                 </div>
    
