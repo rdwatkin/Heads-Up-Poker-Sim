@@ -85,7 +85,7 @@ class GamePage extends React.Component {
 
 
 
-/*
+
     get_value(card){
         var val = card.slice(0, card.length);
         if(val == "1")
