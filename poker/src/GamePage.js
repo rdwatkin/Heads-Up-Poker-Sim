@@ -74,6 +74,11 @@ class GamePage extends React.Component {
         return <img src={imgsrc} style={{height: "10em", marginRight: '10px'}}/>;
     }
 
+    get_value(card){
+        var val = card.slice(0, card.length);
+        var suit = card.slice(card.length-1, card.length);
+        return [parseInt(val), suit];
+    }
 
     //main, control action of the game: whos turn, pot size/winner, flips cards when needed
     game_control() {
