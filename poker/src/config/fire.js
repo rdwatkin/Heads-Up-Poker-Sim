@@ -1,15 +1,15 @@
 import firebase from 'firebase';
 
 const firebaseConfig = {
-    apiKey: "AIzaSyCs2Lqiv-uhSHtoUoNVXhVfsS17n_sVUp4",
-    authDomain: "heads-up-poker-e6660.firebaseapp.com",
-    databaseURL: "https://heads-up-poker-e6660.firebaseio.com",
-    projectId: "heads-up-poker-e6660",
-    storageBucket: "heads-up-poker-e6660.appspot.com",
-    messagingSenderId: "1048257876368",
-    appId: "1:1048257876368:web:04aa16846a8f129c216315",
-    measurementId: "G-9WLQLCE8Y0"
-  };
+  apiKey: "AIzaSyDKHg3Do27Yf1UUCtBpJma17tFPmaV9RJU",
+  authDomain: "ygigiu-516ca.firebaseapp.com",
+  databaseURL: "https://ygigiu-516ca.firebaseio.com",
+  projectId: "ygigiu-516ca",
+  storageBucket: "ygigiu-516ca.appspot.com",
+  messagingSenderId: "610036309890",
+  appId: "1:610036309890:web:ef99aa059ecee0ad18399b",
+  measurementId: "G-JTNXZV7H35"
+};
 
   const fire = firebase.initializeApp(firebaseConfig);
   export default fire;

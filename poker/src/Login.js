@@ -19,12 +19,16 @@ class login extends React.Component {
     }
 
     signUp() {
-        const email = document.querySelector("#email").value;
+        const user_email = document.querySelector("#email").value;
         const password = document.querySelector("#password").value;
     
-        fire.auth().createUserWithEmailAndPassword(email, password)
+        fire.auth().createUserWithEmailAndPassword(user_email, password)
             .then((u) => {
                 console.log("Successfully Signed Up");
+                var userID = fire.auth().currentUser.uid;
+                fire.database().ref("/Root/RegisteredPlayers/"+userID).set({
+                    email: user_email 
+                })
             })
             .catch((err) => {
                 console.log("Error: " + err.toString());
