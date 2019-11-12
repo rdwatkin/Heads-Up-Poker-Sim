@@ -76,9 +76,46 @@ class GamePage extends React.Component {
 
     get_value(card){
         var val = card.slice(0, card.length);
-        var suit = card.slice(card.length-1, card.length);
-        return [parseInt(val), suit];
+        if(val == "1")
+            return 14;
+        else if(val == "J")
+            return 11;
+        else if(val == "Q")
+            return 12;
+        else if(val == "K")
+            return 13;
+        return parseInt(val);
     }
+
+    get_suit(card){
+        return  card.slice(card.length-1, card.length);
+    }
+
+    hand_check(){
+        var hand = [Ca1, Ca2, Ca3, Ca4, Ca5, P1C1, P1C2];
+        if(royal_flush_check(hand)){
+            return "royal flush";
+        }
+    }
+
+    royal_flush_check(current_cards){
+        royals_check = false;
+        same_suit_check = false
+        sorted_hand = current_cards.sort(function(a, b) {return a-b;});
+        if(get_value(sorted_hand[3]) == 10 && get_value(sorted_hand[4]) == 11 && get_value(sorted_hand[5]) == 12 && get_value(sorted_hand[6]) == 13 && get_value(sorted_hand[7]) == 14){
+            royals_check = true;
+        }
+        if(get_suit(sorted_hand[3]) == get_suit(sorted_hand[4]) == get_suit(sorted_hand[5]) == get_suit(sorted_hand[6]) == get_suit(sorted_hand[7])){
+            same_suit_check = true;
+        } 
+        if(royals_check == true && same_suit_check == true){
+            return true;
+        }
+        else{
+            return false;
+        }
+    }
+
 
     //main, control action of the game: whos turn, pot size/winner, flips cards when needed
     game_control() {
@@ -216,7 +253,6 @@ class GamePage extends React.Component {
             </div>
         )
     }
- 
 }
  
 export default GamePage;
