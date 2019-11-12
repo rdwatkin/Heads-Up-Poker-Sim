@@ -33,14 +33,14 @@ class GamePage extends React.Component {
     componentWillMount(){
         //Get Cards From Database
         fire.database().ref("/Root/GameID/").once('value', snapshot => {
-            var Player1 = fire.auth().currentUser.uid;
+            var currUser = fire.auth().currentUser.uid;
             var Car1 = snapshot.child("C1").val()
             var Car2 = snapshot.child("C2").val()
             var Car3 = snapshot.child("C3").val()
             var Car4 = snapshot.child("C4").val()
             var Car5 = snapshot.child("C5").val()
-            var P1Ca1 = snapshot.child(Player1).child("C1").val()
-            var P1Ca2 = snapshot.child(Player1).child("C2").val()
+            var P1Ca1 = snapshot.child(currUser).child("C1").val()
+            var P1Ca2 = snapshot.child(currUser).child("C2").val()
             /* Set State Variables */
             this.setState({
                 Ca1: Car1,

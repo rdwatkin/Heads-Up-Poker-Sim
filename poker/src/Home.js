@@ -47,7 +47,10 @@ class Home extends React.Component {
                 </div>
                 <div>
                     <Link to="/playerSelect">
-                        <button style={{margin: '10px'}} onClick={this.generateInitialGameState}>PvP</button>
+                        <button style={{margin: '10px'}} onClick={this.generateInitialGameState}>Create PvP</button>
+                    </Link>
+                    <Link to="/gamepage">
+                        <button style={{margin: '10px'}} onClick={this.generateInitialGameState}>Join PvP</button>
                     </Link>
                     <button style={{margin: '10px'}}>PvE</button>
                 </div>

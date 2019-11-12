@@ -4,14 +4,14 @@ import GamePage from './GamePage.js';
 import { Link } from 'react-router-dom';
 import Route from 'react-router-dom/Route';
 
-
 class playerSelect extends React.Component {
 
     constructor(props) {
         super(props);
 
         this.state = {
-          user: null,
+          user1: null,
+          user2: null
         }
 
         this.authListener = this.authListener.bind(this);
@@ -23,11 +23,11 @@ class playerSelect extends React.Component {
     }
 
     authListener() {
-        fire.auth().onAuthStateChanged((user) => {
-          if (user) {
-            this.setState({ user });
+        fire.auth().onAuthStateChanged((user1) => {
+          if (user1) {
+            this.setState({ user1 });
           } else {
-            this.setState({ user: null });
+            this.setState({ user1: null });
           }
         })
     }
@@ -56,11 +56,26 @@ class playerSelect extends React.Component {
         return dealt_cards;
     }
 
+    setUser2 = () => {
+        var email = document.querySelector("#email").value;
+        const usersRef = fire.database().ref("/Root/RegisteredPlayers").orderByKey();
+        usersRef.once('value', snapshot => {
+            snapshot.forEach(child=>{
+                if(child.val().email == email){
+                    console.log(child.val().email+"\n"+child.key)
+                    this.setState({user2: child}, () => {
+                        console.log("Success!");
+                        this.generateInitialGameState()
+                    });
+                }
+            })
+        })
+    }
+
     generateInitialGameState = () => {
         var cards_dealt = this.deal_nine_cards();
-        var user1 = this.state.user.uid.toString();
-        var user2 = document.querySelector("#email").value;
-
+        var user1 = this.state.user1.uid
+        var user2 = this.state.user2.key;
         fire.database().ref("/Root/GameID/").set({
                 C1: cards_dealt[0],
                 C2: cards_dealt[1],
@@ -76,15 +91,14 @@ class playerSelect extends React.Component {
             C1: cards_dealt[7],
             C2: cards_dealt[8]
         });
+        this.props.history.push('./gamepage');
     }
 
     render() {
         return ( 
             <div align="center" style={{margin: '50px'}}> 
                 <input id="email" placeholder="Enter Opponent Username" size="48" type="text"/>
-                <Link to="/gamepage">
-                    <button style={{margin: '10px'}} onClick={this.generateInitialGameState}>Start</button>
-                </Link>
+                <button style={{margin: '10px'}} onClick={this.setUser2}>Start</button>
             </div>
         )
     }
