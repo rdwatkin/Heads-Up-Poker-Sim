@@ -71,7 +71,9 @@ class GamePage extends React.Component {
                 P2chips: 1000,
                 pot: 0,
                 currTurn: Fturn,
-                Me: whoAmI
+                Me: whoAmI,
+                num_checks: 0,
+                num_call: 0
             }, this.game_control )
         })
     }
@@ -79,7 +81,7 @@ class GamePage extends React.Component {
     //for now, going to make it bet 50 by default
     bet(){
         //adjust chips and pot size
-        if (this.state.currTurn == "Player 1"){
+        if (this.state.currTurn == this.state.Me){
             this.state.P1chips -= 50;
             this.state.pot += 50;
         } else {
@@ -91,18 +93,19 @@ class GamePage extends React.Component {
     }
 
     call(){
-        if (this.state.currTurn == "Player 1"){
+        if (this.state.currTurn == this.state.Me){
             this.state.P1chips -= 50;
             this.state.pot += 50;
         } else {
             this.state.P2chips -= 50;
             this.state.pot += 50;
         }
+        this.state.num_call ++;
         this.update_turn();
     }
 
     raise(){
-        if (this.state.currTurn == "Player 1"){
+        if (this.state.currTurn == this.state.Me){
             this.state.P1chips -= 50;
             this.state.pot += 50;
         } else {
@@ -113,6 +116,7 @@ class GamePage extends React.Component {
     }
 
     check(){
+        this.state.num_checks ++;
         this.update_turn();
     }
 
@@ -123,7 +127,6 @@ class GamePage extends React.Component {
         this.update_turn();
     }
 
-    
 
     upload_turn(){
         var whos_turn = "Player 1";
@@ -176,9 +179,6 @@ class GamePage extends React.Component {
         let imgsrc = images('./'+card+'.png');
         return <img src={imgsrc} style={{height: "10em", marginRight: '10px'}}/>;
     }
-
-
-
 
     get_value(card){
         var val = card.slice(0, card.length);
@@ -281,18 +281,36 @@ class GamePage extends React.Component {
 
 
 
+
+
+
+
+    sleep(milliseconds) {
+        var start = new Date().getTime();
+        for (var i = 0; i < 1e7; i++) {
+          if ((new Date().getTime() - start) > milliseconds){
+            break;
+          }
+        }
+      }
+
+
     //main, control action of the game: whos turn, pot size/winner, flips cards when needed
     game_control() {
         //initialize variables
         var gameover = false;
         var action_complete = false;
-        var pot = 0;
-        //var P1chips = 1000;
-        //var P2chips = 1000;
         var smallblind = "start";
-        var bigblind = "temp";
         //while niether player has 0 chips
         while (gameover == false) {
+            //show back of all cards at the begginning of the hand
+            this.state.Ca1 = "back";
+            this.state.Ca2 = "back";
+            this.state.Ca3 = "back";
+            this.state.Ca4 = "back";
+            this.state.Ca5 = "back";
+            this.state.num_checks = 0;
+            this.state.num_call = 0;
             //switch blinds
             if (smallblind == "P1"){
                 smallblind = "P2";
@@ -301,91 +319,113 @@ class GamePage extends React.Component {
             }
             //remove blinds from players: 25 for small blind, 50 for big blind
             if (smallblind == "P1"){
-                this.state.P1chips -= 25;
-                //this.setState({P1chips: 25})
-                //this.setState({P1chips: this.state.P1chips - 50})
-                console.log(this.state.Me);
-
-                this.state.P2chips -= 50;
                 //update on display
-                
+                this.state.P1chips -= 25;
+                this.state.P2chips -= 50;
             } else {
+                //update on display
                 this.state.P1chips -= 50;
                 this.state.P2chips -= 25;
-                //update on display
-
             }
             //add blinds to the pot
             this.state.pot = 75;
-            //update on display
-            gameover = true;
             //show each player their cards, while having opponets flipped
-
 //Pre Flop            
             while(action_complete == false){
-                //Allow small blind to have action
-            
-
-                //Give Big blind action
+                this.sleep(5000);
+                //when there are two checks
+                //setTimeout(5000);
+                if (this.state.num_checks == 2){
+                    action_complete = true;
+                }
+                //when there is a call
+                if (this.state.num_call == 1){
+                    action_complete = true;
+                }
+                //when there is a fold
+            }
+            //reset action_complete and num_call/checks
+            action_complete = false;
+            this.state.num_call = 0;
+            this.state.num_checks = 0;
+            //When action is complete, show flop to both players
+            fire.database().ref("/Root/GameID/").once('value', snapshot => {
+                var Car1 = snapshot.child("C1").val()
+                var Car2 = snapshot.child("C2").val()
+                var Car3 = snapshot.child("C3").val()
+                    this.setState({
+                        Ca1: Car1,
+                        Ca2: Car2,
+                        Ca3: Car3
+                    })
+            })
+//Flop            
+            while(action_complete == false){
+                //when there are two checks
+                if (this.state.num_checks == 2){
+                    action_complete = true;
+                }
+                //when there is a call
+                if (this.state.num_call == 1){
+                    action_complete = true;
+                }
+                //when there is a fold
+            }
+            //reset action_complete
+            action_complete = false;
+            this.state.num_call = 0;
+            this.state.num_checks = 0;
+            //when action is complete, show turn to both players
+            fire.database().ref("/Root/GameID/").once('value', snapshot => {
+                var Car4 = snapshot.child("C4").val()
+                    this.setState({
+                        Ca4: Car4
+                    })
+            })
+//Turn
+            while(action_complete == false){
+                
+                //when there are two checks
+                if (this.state.num_checks == 2){
+                    action_complete = true;
+                }
+                //when there is a call
+                if (this.state.num_call == 1){
+                    action_complete = true;
+                }
+                //when there is a fold
                 
 
 
-                action_complete = true;
+
             }
             //reset action_complete
             action_complete = false;
-
-
-            //When action is complete, show flop to both players
-
-
-//Flop            
-            while(action_complete == false){
-                //Allow small blind to have action
-            
-                //Give Big blind action
-
-
-
-
-                action_complete = true;
-            }
-            //reset action_complete
-            action_complete = false;
-            //when action is complete, show turn to both players
-
-//Turn
-            while(action_complete == false){
-                //Allow small blind to have action
-            
-
-                //Give Big blind action
-
-
-
-
-                action_complete = true;
-            }
-            //reset action_complete
-            action_complete = false;
+            this.state.num_call = 0;
+            this.state.num_checks = 0;
             //when action is complete, show river to both players
-
-            
-
+            fire.database().ref("/Root/GameID/").once('value', snapshot => {
+                var Car5 = snapshot.child("C5").val()
+                    this.setState({
+                        Ca5: Car5
+                    })
+            })
 //River
             while(action_complete == false){
-                //Allow small blind to have action
-            
-
-                //Give Big blind action
-
-
-
-
-                action_complete = true;
+                //when there are two checks
+                if (this.state.num_checks == 2){
+                    action_complete = true;
+                }
+                //when there is a call
+                if (this.state.num_call == 1){
+                    action_complete = true;
+                }
+                //when there is a fold
             }
             //reset action_complete
             action_complete = false;
+            this.state.num_call = 0;
+            this.state.num_checks = 0;
             //When action is complete, show both players cards, and award pot to winner. Reset
 
 
@@ -393,13 +433,29 @@ class GamePage extends React.Component {
 
 
             //Determine if game is over
-            if (this.state.P1chips == 0 || this.state.P2chips == 0){
+            if (this.state.P1chips <= 0 || this.state.P2chips <= 0){
                 gameover = true;
             }
+            gameover = true;
         }
         //game is over
 
     }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
     render() {
         return (
@@ -416,11 +472,11 @@ class GamePage extends React.Component {
  
                 <div style={{display: 'flex', justifyContent: 'center', height: "50%", margin: '10px'}}>
                 <h1 style={{textAlign: "center", margin: '30px'}}>Pot<br/> {this.state.pot}</h1>
-                    { this.get_card_img("back") }
-                    { this.get_card_img("back") }
-                    { this.get_card_img("back") }
-                    { this.get_card_img("back") }
-                    { this.get_card_img("back") }
+                    { this.get_card_img(this.state.Ca1) }
+                    { this.get_card_img(this.state.Ca2) }
+                    { this.get_card_img(this.state.Ca3) }
+                    { this.get_card_img(this.state.Ca4) }
+                    { this.get_card_img(this.state.Ca5) }
                 </div>
  
                 <div style={{display: 'flex', justifyContent: 'center', height: "100%", margin: '50px'}}>
