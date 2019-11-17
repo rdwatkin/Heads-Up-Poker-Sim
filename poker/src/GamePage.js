@@ -73,10 +73,13 @@ class GamePage extends React.Component {
                 currTurn: Fturn,
                 Me: whoAmI,
                 num_checks: 0,
-                num_call: 0
-            }, this.game_control )
+                num_call: 0,
+                where_in_game: "start"
+            }, this.begin_game )
         })
     }
+
+//------------------------------------Button Actions Below ---------------------------------------
 
     //for now, going to make it bet 50 by default
     bet(){
@@ -92,41 +95,155 @@ class GamePage extends React.Component {
         this.update_turn();
     }
 
-    call(){
+    //need to edit
+    raise(){
         if (this.state.currTurn == this.state.Me){
-            this.state.P1chips -= 50;
-            this.state.pot += 50;
+            this.state.P1chips -= 150;
+            this.state.pot += 150;
         } else {
-            this.state.P2chips -= 50;
-            this.state.pot += 50;
+            this.state.P2chips -= 150;
+            this.state.pot += 150;
         }
-        this.state.num_call ++;
         this.update_turn();
     }
 
-    raise(){
-        if (this.state.currTurn == this.state.Me){
-            this.state.P1chips -= 50;
-            this.state.pot += 50;
-        } else {
-            this.state.P2chips -= 50;
-            this.state.pot += 50;
+    call(){
+        if(this.state.where_in_game == "start"){
+            //put chips in pot
+            if (this.state.currTurn == this.state.Me){
+                this.state.P1chips -= 50;
+                this.state.pot += 50;
+            } else {
+                this.state.P2chips -= 50;
+                this.state.pot += 50;
+            }
+            //show flop
+            fire.database().ref("/Root/GameID/").once('value', snapshot => {
+                var Car1 = snapshot.child("C1").val()
+                var Car2 = snapshot.child("C2").val()
+                var Car3 = snapshot.child("C3").val()
+                    this.setState({
+                        Ca1: Car1,
+                        Ca2: Car2,
+                        Ca3: Car3
+                    })
+            })
+            //update where_in game
+            this.state.where_in_game = "flop";
+        } else if(this.state.where_in_game == "flop"){
+            //put chips in pot
+            if (this.state.currTurn == this.state.Me){
+                this.state.P1chips -= 50;
+                this.state.pot += 50;
+            } else {
+                this.state.P2chips -= 50;
+                this.state.pot += 50;
+            }
+            //show turn
+            fire.database().ref("/Root/GameID/").once('value', snapshot => {
+                var Car4 = snapshot.child("C4").val()
+                    this.setState({
+                        Ca4: Car4
+                    })
+            })
+            //update where_in game
+            this.state.where_in_game = "turn";
+        } else if (this.state.where_in_game == "turn"){
+           //put chips in pot
+           if (this.state.currTurn == this.state.Me){
+                this.state.P1chips -= 50;
+                this.state.pot += 50;
+            } else {
+                this.state.P2chips -= 50;
+                this.state.pot += 50;
+            }
+            //show river
+            fire.database().ref("/Root/GameID/").once('value', snapshot => {
+                var Car5 = snapshot.child("C5").val()
+                    this.setState({
+                        Ca5: Car5
+                    })
+            })
+            //update where_in game
+            this.state.where_in_game = "river";
+        } else if (this.state.where_in_game == "river"){
+            //compare hands
+
         }
+        //reset num_checks
+        this.state.num_checks = 0;
+        //update turn;
         this.update_turn();
     }
 
     check(){
         this.state.num_checks ++;
+        if (this.state.num_checks == 2){
+            if (this.state.where_in_game == "start"){
+                //show flop
+                fire.database().ref("/Root/GameID/").once('value', snapshot => {
+                    var Car1 = snapshot.child("C1").val()
+                    var Car2 = snapshot.child("C2").val()
+                    var Car3 = snapshot.child("C3").val()
+                        this.setState({
+                            Ca1: Car1,
+                            Ca2: Car2,
+                            Ca3: Car3
+                        })
+                })
+                //update where_in game
+                this.state.where_in_game = "flop";
+            } else if (this.state.where_in_game == "flop"){
+                //show turn
+                fire.database().ref("/Root/GameID/").once('value', snapshot => {
+                    var Car4 = snapshot.child("C4").val()
+                        this.setState({
+                            Ca4: Car4
+                        })
+                })
+                //update where_in game
+                this.state.where_in_game = "turn";
+            } else if (this.state.where_in_game == "turn"){
+                //show river
+                fire.database().ref("/Root/GameID/").once('value', snapshot => {
+                    var Car5 = snapshot.child("C5").val()
+                        this.setState({
+                            Ca5: Car5
+                        })
+                })
+                //update where_in game
+                this.state.where_in_game = "river";
+            } else if (this.state.where_in_game == "river"){
+                //compare hands
+
+            }
+
+            //reset num_checks
+            this.state.num_checks = 0;
+        }
         this.update_turn();
     }
 
     fold(){
-        //end hand
-
-        //temp
+        //give pot to other player
+        if (this.state.currTurn == this.state.Me){
+            this.state.P1chips += this.state.pot;
+        } else {
+            this.state.P2chips += this.state.pot;
+        }
+        //reset pot
+        this.state.pot = 0;
+        //end hand, flip cards. Will need to re deal
+        this.state.Ca1 = "back";
+        this.state.Ca2 = "back";
+        this.state.Ca3 = "back";
+        this.state.Ca4 = "back";
+        this.state.Ca5 = "back";
+        this.state.where_in_game = "end";
         this.update_turn();
     }
 
+//------------------------------------Button Actions Above ---------------------------------------
 
     upload_turn(){
         var whos_turn = "Player 1";
@@ -280,166 +397,35 @@ class GamePage extends React.Component {
     }
 
 
-
-
-
-
-
-    sleep(milliseconds) {
-        var start = new Date().getTime();
-        for (var i = 0; i < 1e7; i++) {
-          if ((new Date().getTime() - start) > milliseconds){
-            break;
-          }
-        }
-      }
-
-
-    //main, control action of the game: whos turn, pot size/winner, flips cards when needed
-    game_control() {
-        //initialize variables
-        var gameover = false;
-        var action_complete = false;
-        var smallblind = "start";
-        //while niether player has 0 chips
-        while (gameover == false) {
-            //show back of all cards at the begginning of the hand
-            this.state.Ca1 = "back";
-            this.state.Ca2 = "back";
-            this.state.Ca3 = "back";
-            this.state.Ca4 = "back";
-            this.state.Ca5 = "back";
-            this.state.num_checks = 0;
-            this.state.num_call = 0;
-            //switch blinds
-            if (smallblind == "P1"){
-                smallblind = "P2";
-            } else {
-                smallblind = "P1";
-            }
-            //remove blinds from players: 25 for small blind, 50 for big blind
-            if (smallblind == "P1"){
-                //update on display
-                this.state.P1chips -= 25;
-                this.state.P2chips -= 50;
-            } else {
-                //update on display
-                this.state.P1chips -= 50;
-                this.state.P2chips -= 25;
-            }
-            //add blinds to the pot
-            this.state.pot = 75;
-            //show each player their cards, while having opponets flipped
-//Pre Flop            
-            while(action_complete == false){
-                //when there are two checks
-                if (this.state.num_checks == 2){
-                    action_complete = true;
-                }
-                //when there is a call
-                if (this.state.num_call == 1){
-                    action_complete = true;
-                }
-                //when there is a fold
-            }
-            //reset action_complete and num_call/checks
-            action_complete = false;
-            this.state.num_call = 0;
-            this.state.num_checks = 0;
-            //When action is complete, show flop to both players
-            fire.database().ref("/Root/GameID/").once('value', snapshot => {
-                var Car1 = snapshot.child("C1").val()
-                var Car2 = snapshot.child("C2").val()
-                var Car3 = snapshot.child("C3").val()
-                    this.setState({
-                        Ca1: Car1,
-                        Ca2: Car2,
-                        Ca3: Car3
-                    })
-            })
-//Flop            
-            while(action_complete == false){
-                //when there are two checks
-                if (this.state.num_checks == 2){
-                    action_complete = true;
-                }
-                //when there is a call
-                if (this.state.num_call == 1){
-                    action_complete = true;
-                }
-                //when there is a fold
-            }
-            //reset action_complete
-            action_complete = false;
-            this.state.num_call = 0;
-            this.state.num_checks = 0;
-            //when action is complete, show turn to both players
-            fire.database().ref("/Root/GameID/").once('value', snapshot => {
-                var Car4 = snapshot.child("C4").val()
-                    this.setState({
-                        Ca4: Car4
-                    })
-            })
-//Turn
-            while(action_complete == false){
-                //when there are two checks
-                if (this.state.num_checks == 2){
-                    action_complete = true;
-                }
-                //when there is a call
-                if (this.state.num_call == 1){
-                    action_complete = true;
-                }
-                //when there is a fold
-            }
-            //reset action_complete
-            action_complete = false;
-            this.state.num_call = 0;
-            this.state.num_checks = 0;
-            //when action is complete, show river to both players
-            fire.database().ref("/Root/GameID/").once('value', snapshot => {
-                var Car5 = snapshot.child("C5").val()
-                    this.setState({
-                        Ca5: Car5
-                    })
-            })
-//River
-            while(action_complete == false){
-                //when there are two checks
-                if (this.state.num_checks == 2){
-                    action_complete = true;
-                }
-                //when there is a call
-                if (this.state.num_call == 1){
-                    action_complete = true;
-                }
-                //when there is a fold
-            }
-            //reset action_complete
-            action_complete = false;
-            this.state.num_call = 0;
-            this.state.num_checks = 0;
-            //When action is complete, show both players cards, and award pot to winner. Reset
-
-
-            //call function to determine winner
-
-
-            //Determine if game is over
-            if (this.state.P1chips <= 0 || this.state.P2chips <= 0){
-                gameover = true;
-            }
-            gameover = true;
-        }
-        //game is over
-
+begin_game(){
+    var smallblind = "start";
+    //show back of all cards at the begginning of the hand
+    this.state.Ca1 = "back";
+    this.state.Ca2 = "back";
+    this.state.Ca3 = "back";
+    this.state.Ca4 = "back";
+    this.state.Ca5 = "back";
+    this.state.num_checks = 0;
+    this.state.num_call = 0;
+    //switch blinds
+    if (smallblind == "P1"){
+        smallblind = "P2";
+    } else {
+       smallblind = "P1";
     }
-
-
-
-
-
-
+    //remove blinds from players: 25 for small blind, 50 for big blind
+    if (smallblind == "P1"){
+        //update on display
+        this.state.P1chips -= 25;
+        this.state.P2chips -= 50;
+    } else {
+        //update on display
+        this.state.P1chips -= 50;
+        this.state.P2chips -= 25;
+    }
+    //add blinds to the pot
+    this.state.pot = 75;
+}
 
 
 
