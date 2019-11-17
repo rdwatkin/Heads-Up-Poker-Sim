@@ -47,8 +47,6 @@ class GamePage extends React.Component {
             var P1Ca1 = snapshot.child(currUser).child("C1").val()
             var P1Ca2 = snapshot.child(currUser).child("C2").val()
             var Fturn = snapshot.child("turn").child("currTurn").val()
-            //var Player1chips = 100;
-            //var Player2chips = 100;
             /* Set State Variables */
             this.setState({
                 Ca1: Car1,
@@ -58,13 +56,70 @@ class GamePage extends React.Component {
                 Ca5: Car5,
                 P1C1: P1Ca1,
                 P1C2: P1Ca2,
-                P1chips: 1000,
-                P2chips: 1000,
-                pot: 0,
+                
                 currTurn: Fturn
             })
+            
         })
+        this.setState({
+            P1chips: 1000,
+            P2chips: 1000,
+            pot: 0
+                    },
+                    this.game_control
+                    
+                    )
+        
     }
+
+    //for now, going to make it bet 50 by default
+    bet(){
+        //adjust chips and pot size
+        if (this.state.currTurn == "Player 1"){
+            this.state.P1chips -= 50;
+            this.state.pot += 50;
+        } else {
+            this.state.P2chips -= 50;
+            this.state.pot += 50;
+        }
+        //adjust turn
+        this.update_turn();
+    }
+
+    call(){
+        if (this.state.currTurn == "Player 1"){
+            this.state.P1chips -= 50;
+            this.state.pot += 50;
+        } else {
+            this.state.P2chips -= 50;
+            this.state.pot += 50;
+        }
+        this.update_turn();
+    }
+
+    raise(){
+        if (this.state.currTurn == "Player 1"){
+            this.state.P1chips -= 50;
+            this.state.pot += 50;
+        } else {
+            this.state.P2chips -= 50;
+            this.state.pot += 50;
+        }
+        this.update_turn();
+    }
+
+    check(){
+        this.update_turn();
+    }
+
+    fold(){
+        //end hand
+
+        //temp
+        this.update_turn();
+    }
+
+    
 
     upload_turn(){
         var whos_turn = "Player 1";
@@ -243,6 +298,10 @@ class GamePage extends React.Component {
             //remove blinds from players: 25 for small blind, 50 for big blind
             if (smallblind == "P1"){
                 this.state.P1chips -= 25;
+                //this.setState({P1chips: 25})
+                //this.setState({P1chips: this.state.P1chips - 50})
+                console.log(this.state.P1chips);
+
                 this.state.P2chips -= 50;
                 //update on display
                 
@@ -255,7 +314,7 @@ class GamePage extends React.Component {
             //add blinds to the pot
             this.state.pot = 75;
             //update on display
-
+            gameover = true;
             //show each player their cards, while having opponets flipped
 
 //Pre Flop            
@@ -265,6 +324,9 @@ class GamePage extends React.Component {
 
                 //Give Big blind action
                 
+
+
+                action_complete = true;
             }
             //reset action_complete
             action_complete = false;
@@ -278,7 +340,11 @@ class GamePage extends React.Component {
                 //Allow small blind to have action
             
                 //Give Big blind action
-                
+
+
+
+
+                action_complete = true;
             }
             //reset action_complete
             action_complete = false;
@@ -290,7 +356,11 @@ class GamePage extends React.Component {
             
 
                 //Give Big blind action
-                
+
+
+
+
+                action_complete = true;
             }
             //reset action_complete
             action_complete = false;
@@ -304,7 +374,11 @@ class GamePage extends React.Component {
             
 
                 //Give Big blind action
-                
+
+
+
+
+                action_complete = true;
             }
             //reset action_complete
             action_complete = false;
@@ -338,11 +412,11 @@ class GamePage extends React.Component {
  
                 <div style={{display: 'flex', justifyContent: 'center', height: "50%", margin: '10px'}}>
                 <h1 style={{textAlign: "center", margin: '30px'}}>Pot<br/> {this.state.pot}</h1>
-                    { this.get_card_img(this.state.Ca1) }
-                    { this.get_card_img(this.state.Ca2) }
-                    { this.get_card_img(this.state.Ca3) }
-                    { this.get_card_img(this.state.Ca4) }
-                    { this.get_card_img(this.state.Ca5) }
+                    { this.get_card_img("back") }
+                    { this.get_card_img("back") }
+                    { this.get_card_img("back") }
+                    { this.get_card_img("back") }
+                    { this.get_card_img("back") }
                 </div>
  
                 <div style={{display: 'flex', justifyContent: 'center', height: "100%", margin: '50px'}}>
@@ -352,11 +426,11 @@ class GamePage extends React.Component {
                     { this.get_card_img(this.state.P1C2) }
  
                     <div style={{display: 'flex', justifyContent: 'center', height: "100%", flexDirection: 'column'}}>
-                        <button style={{margin: '7px', marginTop: '15px'}} onClick={() => {this.update_turn()}}>CHECK</button>
-                        <button style={{margin: '7px'}} onClick={() => {this.update_turn()}}>BET</button>
-                        <button style={{margin: '7px'}} onClick={() => {this.update_turn()}}>RAISE</button>
-                        <button style={{margin: '7px'}} onClick={() => {this.update_turn()}}>CALL</button>
-                        <button style={{margin: '7px'}} onClick={() => {this.update_turn()}}>FOLD</button>
+                        <button style={{margin: '7px', marginTop: '15px'}} onClick={() => {this.check()}}>CHECK</button>
+                        <button style={{margin: '7px'}} onClick={() => {this.bet()}}>BET</button>
+                        <button style={{margin: '7px'}} onClick={() => {this.raise()}}>RAISE</button>
+                        <button style={{margin: '7px'}} onClick={() => {this.call()}}>CALL</button>
+                        <button style={{margin: '7px'}} onClick={() => {this.fold()}}>FOLD</button>
                     </div>
                 </div>
    
