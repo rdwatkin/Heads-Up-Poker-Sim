@@ -332,9 +332,7 @@ class GamePage extends React.Component {
             //show each player their cards, while having opponets flipped
 //Pre Flop            
             while(action_complete == false){
-                this.sleep(5000);
                 //when there are two checks
-                //setTimeout(5000);
                 if (this.state.num_checks == 2){
                     action_complete = true;
                 }
@@ -384,7 +382,6 @@ class GamePage extends React.Component {
             })
 //Turn
             while(action_complete == false){
-                
                 //when there are two checks
                 if (this.state.num_checks == 2){
                     action_complete = true;
@@ -394,10 +391,6 @@ class GamePage extends React.Component {
                     action_complete = true;
                 }
                 //when there is a fold
-                
-
-
-
             }
             //reset action_complete
             action_complete = false;
