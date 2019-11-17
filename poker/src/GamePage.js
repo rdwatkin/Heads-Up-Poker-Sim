@@ -29,7 +29,7 @@ class GamePage extends React.Component {
         this.get_card_img = this.get_card_img.bind(this);
         this.state = {Ca1: "", Ca2: "", Ca3: "", Ca4: "", Ca5: "",
                       P1C1: "", P1C2: "", P2C1: "", P2C2: "", P1chips: "",
-                      P2chips: "", pot: "", currTurn: "", P1: "", P2: "" }
+                      P2chips: "", pot: "", currTurn: "", P1: "", P2: "", Me: "" }
     }
 
     
@@ -49,6 +49,13 @@ class GamePage extends React.Component {
             var Player1 = snapshot.child("Player1").val();
             var Player2 = snapshot.child("Player2").val();
             var Fturn = snapshot.child("turn").child("currTurn").val()
+            var whoAmI = "";
+            if (currUser == Player1){
+                whoAmI = "Player1"
+            }else{
+                whoAmI = "Player2"
+            }
+
             /* Set State Variables */
             this.setState({
                 Ca1: Car1,
@@ -63,15 +70,10 @@ class GamePage extends React.Component {
                 P1chips: 1000,
                 P2chips: 1000,
                 pot: 0,
-                currTurn: Fturn
-            })
+                currTurn: Fturn,
+                Me: whoAmI
+            }, this.game_control )
         })
-        
-        this.setState({
-            P1chips: 1000,
-            P2chips: 1000,
-            pot: 0
-        },this.game_control)
     }
 
     //for now, going to make it bet 50 by default
@@ -302,7 +304,7 @@ class GamePage extends React.Component {
                 this.state.P1chips -= 25;
                 //this.setState({P1chips: 25})
                 //this.setState({P1chips: this.state.P1chips - 50})
-                console.log(this.state.P1chips);
+                console.log(this.state.Me);
 
                 this.state.P2chips -= 50;
                 //update on display
