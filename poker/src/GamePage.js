@@ -275,6 +275,21 @@ class GamePage extends React.Component {
                 currTurn: newTurn
             })
         }
+        //hide buttons when not your turn
+        if (this.state.Me != this.state.currTurn){
+            document.getElementById('Check').style.visibility='hidden';
+            document.getElementById('Bet').style.visibility='hidden';
+            document.getElementById('Call').style.visibility='hidden';
+            document.getElementById('Raise').style.visibility='hidden';
+            document.getElementById('Fold').style.visibility='hidden';
+        //show buttons when your turn
+        } else {
+            document.getElementById('Check').style.visibility='visible';
+            document.getElementById('Bet').style.visibility='visible';
+            document.getElementById('Call').style.visibility='visible';
+            document.getElementById('Raise').style.visibility='visible';
+            document.getElementById('Fold').style.visibility='visible';
+        }
     }
 
     upload_value_to_database(path, name, value){
@@ -451,11 +466,11 @@ begin_game(){
  
                 <div style={{display: 'flex', justifyContent: 'center', height: "50%", margin: '10px'}}>
                 <h1 style={{textAlign: "center", margin: '30px'}}>Pot<br/> {this.state.pot}</h1>
-                    { this.get_card_img(this.state.Ca1) }
-                    { this.get_card_img(this.state.Ca2) }
-                    { this.get_card_img(this.state.Ca3) }
-                    { this.get_card_img(this.state.Ca4) }
-                    { this.get_card_img(this.state.Ca5) }
+                    { this.get_card_img("back") }
+                    { this.get_card_img("back") }
+                    { this.get_card_img("back") }
+                    { this.get_card_img("back") }
+                    { this.get_card_img("back") }
                 </div>
  
                 <div style={{display: 'flex', justifyContent: 'center', height: "100%", margin: '50px'}}>
@@ -465,11 +480,11 @@ begin_game(){
                     { this.get_card_img(this.state.P1C2) }
  
                     <div style={{display: 'flex', justifyContent: 'center', height: "100%", flexDirection: 'column'}}>
-                        <button style={{margin: '7px', marginTop: '15px'}} onClick={() => {this.check()}}>CHECK</button>
-                        <button style={{margin: '7px'}} onClick={() => {this.bet()}}>BET</button>
-                        <button style={{margin: '7px'}} onClick={() => {this.raise()}}>RAISE</button>
-                        <button style={{margin: '7px'}} onClick={() => {this.call()}}>CALL</button>
-                        <button style={{margin: '7px'}} onClick={() => {this.fold()}}>FOLD</button>
+                        <button id ="Check" style={{margin: '7px', marginTop: '15px'}} onClick={() => {this.check()}}>CHECK</button>
+                        <button id ="Bet" style={{margin: '7px'}} onClick={() => {this.bet()}}>BET</button>
+                        <button id = "Raise" style={{margin: '7px'}} onClick={() => {this.raise()}}>RAISE</button>
+                        <button id = "Call" style={{margin: '7px'}} onClick={() => {this.call()}}>CALL</button>
+                        <button id = "Fold" style={{margin: '7px'}} onClick={() => {this.fold()}}>FOLD</button>
                     </div>
                 </div>
    
