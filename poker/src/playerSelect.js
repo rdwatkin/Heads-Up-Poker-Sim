@@ -77,6 +77,8 @@ class playerSelect extends React.Component {
         var user1 = this.state.user1.uid
         var user2 = this.state.user2.key;
         fire.database().ref("/Root/GameID/").set({
+                Player1: user1,
+                Player2: user2,
                 C1: cards_dealt[0],
                 C2: cards_dealt[1],
                 C3: cards_dealt[2],
