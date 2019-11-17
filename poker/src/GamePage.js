@@ -29,12 +29,13 @@ class GamePage extends React.Component {
         this.get_card_img = this.get_card_img.bind(this);
         this.state = {Ca1: "", Ca2: "", Ca3: "", Ca4: "", Ca5: "",
                       P1C1: "", P1C2: "", P2C1: "", P2C2: "", P1chips: "",
-                      P2chips: "", pot: ""}
+                      P2chips: "", pot: "", currTurn: "" }
     }
 
     
 
     componentWillMount(){
+        this.upload_turn();
         //Get Cards From Database
         fire.database().ref("/Root/GameID/").once('value', snapshot => {
             var currUser = fire.auth().currentUser.uid;
@@ -45,6 +46,7 @@ class GamePage extends React.Component {
             var Car5 = snapshot.child("C5").val()
             var P1Ca1 = snapshot.child(currUser).child("C1").val()
             var P1Ca2 = snapshot.child(currUser).child("C2").val()
+            var Fturn = snapshot.child("turn").child("currTurn").val()
             //var Player1chips = 100;
             //var Player2chips = 100;
             /* Set State Variables */
@@ -59,8 +61,41 @@ class GamePage extends React.Component {
                 P1chips: 1000,
                 P2chips: 1000,
                 pot: 0,
+                currTurn: Fturn
             })
         })
+    }
+
+    upload_turn(){
+        var whos_turn = "Player 1";
+        fire.database().ref("/Root/GameID/turn").set({
+            currTurn: whos_turn
+        })
+        fire.database().ref()
+    }
+
+    update_turn(){
+        var turn = this.state.currTurn;
+        if(turn == "Player 1"){
+            var newTurn = "Player 2";
+            fire.database().ref("/Root/GameID/turn").update({
+                currTurn: newTurn
+            })
+            fire.database().ref()
+            this.setState({
+                currTurn: newTurn
+            })
+        }
+        else{
+            var newTurn = "Player 1";
+            fire.database().ref("/Root/GameID/turn").update({
+                currTurn: newTurn
+            })
+            fire.database().ref()
+            this.setState({
+                currTurn: newTurn
+            })
+        }
     }
 
     upload_value_to_database(path, name, value){
@@ -292,6 +327,9 @@ class GamePage extends React.Component {
         return (
             <div>
                 <div style={{display: 'flex', justifyContent: 'center', height: "50%", margin: '50px'}}>
+                    <h1><u>It is {this.state.currTurn}'s turn</u></h1>
+                </div>
+                <div style={{display: 'flex', justifyContent: 'center', height: "50%", margin: '50px'}}>
                     <h1 style={{textAlign: "center", margin: '30px', marginLeft: '210px'}}>
                         Opponent Stack<br/> {this.state.P2chips} </h1>
                     { this.get_card_img("back") }
@@ -314,11 +352,11 @@ class GamePage extends React.Component {
                     { this.get_card_img(this.state.P1C2) }
  
                     <div style={{display: 'flex', justifyContent: 'center', height: "100%", flexDirection: 'column'}}>
-                        <button style={{margin: '7px', marginTop: '15px'}} onClick={this.login}>CHECK</button>
-                        <button style={{margin: '7px'}} onClick={this.deal_to_players}>BET</button>
-                        <button style={{margin: '7px'}} onClick={this.login}>RAISE</button>
-                        <button style={{margin: '7px'}} onClick={this.login}>CALL</button>
-                        <button style={{margin: '7px'}} onClick={this.login}>FOLD</button>
+                        <button style={{margin: '7px', marginTop: '15px'}} onClick={() => {this.update_turn()}}>CHECK</button>
+                        <button style={{margin: '7px'}} onClick={() => {this.update_turn()}}>BET</button>
+                        <button style={{margin: '7px'}} onClick={() => {this.update_turn()}}>RAISE</button>
+                        <button style={{margin: '7px'}} onClick={() => {this.update_turn()}}>CALL</button>
+                        <button style={{margin: '7px'}} onClick={() => {this.update_turn()}}>FOLD</button>
                     </div>
                 </div>
    
