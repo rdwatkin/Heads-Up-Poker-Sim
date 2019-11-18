@@ -220,7 +220,61 @@ class GamePage extends React.Component {
         return [triple_value, double_value];
     }
 
+    triple_check(current_cards){
+        var reverse_sorted_hand = current_cards.sort(function(a, b) {return b-a;}); //Reverse sort to find the highest triple/pair first
+        var triple_check = false;
+        var triple_count = 0;
+        var triple_value = 0;
+        var temp = 0;
+        //Check for the highest triple
+        for(var i = 0; i < 7; i++){
+            if(temp == this.get_value(reverse_sorted_hand[i])){
+                triple_count++;
+                if(triple_count == 3){
+                    triple_check = true;
+                    triple_value = this.get_value(reverse_sorted_hand[i])
+                    break;
+                }
+            }
+            else{
+                temp = this.get_value(reverse_sorted_hand[i]);
+                triple_count = 1;
+            }
+        }
+        if(triple_check = false){
+            return 0;
+        }
+        return triple_value;
 
+    }
+
+    pair_check(current_cards){
+        var reverse_sorted_hand = current_cards.sort(function(a, b) {return b-a;}); //Reverse sort to find the highest triple/pair first
+        var double_check = false;
+        var double_count = 0;
+        var double_value = 0;
+        var temp = 0;
+        //Check for the highest triple
+        for(var i = 0; i < 7; i++){
+            if(temp == this.get_value(reverse_sorted_hand[i])){
+                double_count++;
+                if(double_count == 2){
+                    double_check = true;
+                    double_value = this.get_value(reverse_sorted_hand[i])
+                    break;
+                }
+            }
+            else{
+                temp = this.get_value(reverse_sorted_hand[i]);
+                double_count = 1;
+            }
+        }
+        if(double_check = false){
+            return 0;
+        }
+        return double_value;
+
+    } 
 
     //main, control action of the game: whos turn, pot size/winner, flips cards when needed
     game_control() {
