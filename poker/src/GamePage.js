@@ -212,7 +212,7 @@ class GamePage extends React.Component {
             }
 
             //reset num_checks
-            //this.state.num_checks = 0;
+            this.state.num_checks = 0;
             this.update_num_checks();
         }
         this.update_turn();
@@ -606,7 +606,15 @@ begin_hand(){
                 num_checks: nchecks,
                 currTurn: Nturn
             })
-    })    
+    })
+    fire.database().ref("/Root/GameID/"+this.state.P1).set({
+        C1: this.state.cards_dealt[5],
+        C2: this.state.cards_dealt[6],
+    });
+    fire.database().ref("/Root/GameID/"+this.state.P2).set({
+        C1: this.state.cards_dealt[7],
+        C2: this.state.cards_dealt[8]
+    });    
 }
 
     render() {
