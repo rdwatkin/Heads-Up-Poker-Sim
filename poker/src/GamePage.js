@@ -249,7 +249,7 @@ class GamePage extends React.Component {
             }
 
             //reset num_checks
-            this.state.num_checks = 0;
+            //this.state.num_checks = 0;
             this.update_num_checks();
         }
         this.update_turn();
@@ -374,8 +374,8 @@ class GamePage extends React.Component {
             })
         }
 
+        
         /*
-
         //hide buttons when not your turn
         if (this.state.Me != this.state.currTurn){
             document.getElementById('Check').style.visibility='hidden';
@@ -391,8 +391,8 @@ class GamePage extends React.Component {
             document.getElementById('Raise').style.visibility='visible';
             document.getElementById('Fold').style.visibility='visible';
         }
-
         */
+        
     }
 
     upload_value_to_database(path, name, value){
