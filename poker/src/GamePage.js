@@ -207,16 +207,7 @@ class GamePage extends React.Component {
             if (this.state.where_in_game == "start"){
                 console.log("wtf");
                 //show flop
-                fire.database().ref("/Root/GameID/").once('value', snapshot => {
-                    var Car1 = snapshot.child("C1").val()
-                    var Car2 = snapshot.child("C2").val()
-                    var Car3 = snapshot.child("C3").val()
-                        this.setState({
-                            Ca1: Car1,
-                            Ca2: Car2,
-                            Ca3: Car3
-                        })
-                })
+                this.update5Cards();
                 console.log("test");
                 //update where_in game
                 this.state.where_in_game = "flop";
@@ -283,6 +274,7 @@ class GamePage extends React.Component {
 
 
 //------------------------------------Data Base Control Below ---------------------------------------
+
 
     update_where_in_game(){
         fire.database().ref("/Root/GameID/where_in_game").update({
@@ -412,6 +404,41 @@ class GamePage extends React.Component {
 
 
 //------------------------------------Hand Comparisons Below ---------------------------------------
+    
+    update5Cards(){
+        var cards_dealt = this.deal_nine_cards();
+        fire.database().ref("/Root/GameID/").set({
+                C1: cards_dealt[0],
+                C2: cards_dealt[1],
+                C3: cards_dealt[2],
+                C4: cards_dealt[3],
+                C5: cards_dealt[4],
+        })
+    }
+
+    remove_card(deck, index){
+        for(var i = index; i <= 52; i++ ){
+            deck[i] = deck[i+1];
+        }
+    }
+
+    deal_nine_cards(){
+        var cards_left = 52;
+        var dealt_cards = new Array(10);
+        var deck = ["1S", "2S", "3S", "4S", "5S", "6S", "7S", "8S", "9S", "10S", "JS", "QS", "KS",
+                    "1H", "2H", "3H", "4H", "5H", "6H", "7H", "8H", "9H", "10H", "JH", "QH", "KH",
+                    "1D", "2D", "3D", "4D", "5D", "6D", "7D", "8D", "9D", "10D", "JD", "QD", "KD",
+                    "1C", "2C", "3C", "4C", "5C", "6C", "7C", "8C", "9C", "10C", "JC", "QC", "KC"];
+        var card;
+        var index;
+        for(var i=0; i<9; i++){
+            index = Math.floor(Math.random()*cards_left);
+            dealt_cards[i] = deck[index];
+            this.remove_card(deck, index);
+            cards_left--;
+        }
+        return dealt_cards;
+    }
 
     get_card_img(card){
         if (card == ""){
@@ -568,8 +595,10 @@ begin_hand(){
         var ncall = snapshot.child("num_call").child("num_call").val()
         var nchecks = snapshot.child("num_checks").child("num_checks").val()
         var Nturn = snapshot.child("turn").child("currTurn").val()
+        var Car1 = snapshot.child("C1").val()
         
             this.setState({
+                Ca1: Car1,
                 P2chips: P2Chips,
                 P1chips: P1Chips,
                 where_in_game: where,
