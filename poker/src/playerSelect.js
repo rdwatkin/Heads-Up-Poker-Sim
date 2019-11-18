@@ -49,8 +49,7 @@ class playerSelect extends React.Component {
     }
 
     generateInitialGameState = () => {
-        var cards_dealt = this.deal_nine_cards();
-        var user1 = this.state.user1.uid
+        var user1 = this.state.user1.uid;
         var user2 = this.state.user2.key;
         fire.database().ref("/Root/GameID/").set({
                 Player1: user1,

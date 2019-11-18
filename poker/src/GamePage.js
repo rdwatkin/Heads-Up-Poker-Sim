@@ -29,7 +29,7 @@ class GamePage extends React.Component {
         this.state = {Ca1: "", Ca2: "", Ca3: "", Ca4: "", Ca5: "",
                       P1C1: "", P1C2: "", P2C1: "", P2C2: "", P1chips: "",
                       P2chips: "", pot: "", currTurn: "", P1: "", P2: "", Me: "",
-                      num_call: "", num_checks: "", where_in_game: "" }
+                      num_call: "", num_checks: "", where_in_game: "", cards_dealt: "" }
     }
 
     componentWillMount(){
@@ -72,6 +72,7 @@ class GamePage extends React.Component {
                 Me: whoAmI,
                 num_checks: 0,
                 num_call: 0,
+                cards_dealt: this.deal_nine_cards,
                 where_in_game: "start"
             }, this.begin_hand )
         })
@@ -129,16 +130,7 @@ class GamePage extends React.Component {
                 this.update_pot();
             }
             //show flop
-            fire.database().ref("/Root/GameID/").once('value', snapshot => {
-                var Car1 = snapshot.child("C1").val()
-                var Car2 = snapshot.child("C2").val()
-                var Car3 = snapshot.child("C3").val()
-                    this.setState({
-                        Ca1: Car1,
-                        Ca2: Car2,
-                        Ca3: Car3
-                    })
-            })
+            this.updateFlop()
             //update where_in game
             this.state.where_in_game = "flop";
             this.update_where_in_game();
@@ -156,12 +148,7 @@ class GamePage extends React.Component {
                 this.update_pot();
             }
             //show turn
-            fire.database().ref("/Root/GameID/").once('value', snapshot => {
-                var Car4 = snapshot.child("C4").val()
-                    this.setState({
-                        Ca4: Car4
-                    })
-            })
+            this.updateTurn()
             //update where_in game
             this.state.where_in_game = "turn";
             this.update_where_in_game();
@@ -179,12 +166,7 @@ class GamePage extends React.Component {
                 this.update_pot();
             }
             //show river
-            fire.database().ref("/Root/GameID/").once('value', snapshot => {
-                var Car5 = snapshot.child("C5").val()
-                    this.setState({
-                        Ca5: Car5
-                    })
-            })
+            this.updateRiver()
             //update where_in game
             this.state.where_in_game = "river";
             this.update_where_in_game();
@@ -207,30 +189,20 @@ class GamePage extends React.Component {
             if (this.state.where_in_game == "start"){
                 console.log("wtf");
                 //show flop
-                this.update5Cards();
+                this.updateFlop();
                 console.log("test");
                 //update where_in game
                 this.state.where_in_game = "flop";
                 this.update_where_in_game();
             } else if (this.state.where_in_game == "flop"){
                 //show turn
-                fire.database().ref("/Root/GameID/").once('value', snapshot => {
-                    var Car4 = snapshot.child("C4").val()
-                        this.setState({
-                            Ca4: Car4
-                        })
-                })
+                this.updateTurn();
                 //update where_in game
                 this.state.where_in_game = "turn";
                 this.update_where_in_game();
             } else if (this.state.where_in_game == "turn"){
                 //show river
-                fire.database().ref("/Root/GameID/").once('value', snapshot => {
-                    var Car5 = snapshot.child("C5").val()
-                        this.setState({
-                            Ca5: Car5
-                        })
-                })
+                this.updateRiver()
                 //update where_in game
                 this.state.where_in_game = "river";
                 this.update_where_in_game();
@@ -405,14 +377,23 @@ class GamePage extends React.Component {
 
 //------------------------------------Hand Comparisons Below ---------------------------------------
     
-    update5Cards(){
-        var cards_dealt = this.deal_nine_cards();
+    updateFlop(){
         fire.database().ref("/Root/GameID/").set({
-                C1: cards_dealt[0],
-                C2: cards_dealt[1],
-                C3: cards_dealt[2],
-                C4: cards_dealt[3],
-                C5: cards_dealt[4],
+                C1: this.state.cards_dealt[0],
+                C2: this.state.cards_dealt[1],
+                C3: this.state.cards_dealt[2],
+        })
+    }
+
+    updateTurn(){
+        fire.database().ref("/Root/GameID/").set({
+                C4: this.state.cards_dealt[3]
+        })
+    }
+
+    updateRiver(){
+        fire.database().ref("/Root/GameID/").set({
+                C5: this.state.cards_dealt[4]
         })
     }
 
@@ -596,9 +577,17 @@ begin_hand(){
         var nchecks = snapshot.child("num_checks").child("num_checks").val()
         var Nturn = snapshot.child("turn").child("currTurn").val()
         var Car1 = snapshot.child("C1").val()
+        var Car2 = snapshot.child("C2").val()
+        var Car3 = snapshot.child("C3").val()
+        var Car4 = snapshot.child("C4").val()
+        var Car5 = snapshot.child("C5").val()
         
             this.setState({
                 Ca1: Car1,
+                Ca2: Car2,
+                Ca3: Car3,
+                Ca4: Car4,
+                Ca5: Car5,
                 P2chips: P2Chips,
                 P1chips: P1Chips,
                 where_in_game: where,
