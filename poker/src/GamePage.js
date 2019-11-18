@@ -22,17 +22,15 @@ const images = require.context('./images', true);
 
 class GamePage extends React.Component {
 
-
     /* Bind Functions to Namespace */
     constructor() {
         super()
         this.get_card_img = this.get_card_img.bind(this);
         this.state = {Ca1: "", Ca2: "", Ca3: "", Ca4: "", Ca5: "",
                       P1C1: "", P1C2: "", P2C1: "", P2C2: "", P1chips: "",
-                      P2chips: "", pot: "", currTurn: "", P1: "", P2: "", Me: "" }
+                      P2chips: "", pot: "", currTurn: "", P1: "", P2: "", Me: "",
+                      num_call: "", num_checks: "", where_in_game: "" }
     }
-
-    
 
     componentWillMount(){
         this.upload_turn();
@@ -75,7 +73,7 @@ class GamePage extends React.Component {
                 num_checks: 0,
                 num_call: 0,
                 where_in_game: "start"
-            }, this.begin_game )
+            }, this.begin_hand )
         })
     }
 
@@ -86,10 +84,14 @@ class GamePage extends React.Component {
         //adjust chips and pot size
         if (this.state.currTurn == this.state.Me){
             this.state.P1chips -= 50;
+            this.update_P1chips();
             this.state.pot += 50;
+            this.update_pot();
         } else {
             this.state.P2chips -= 50;
+            this.update_P2chips();
             this.state.pot += 50;
+            this.update_pot();
         }
         //adjust turn
         this.update_turn();
@@ -99,10 +101,14 @@ class GamePage extends React.Component {
     raise(){
         if (this.state.currTurn == this.state.Me){
             this.state.P1chips -= 150;
+            this.update_P1chips();
             this.state.pot += 150;
+            this.update_pot();
         } else {
             this.state.P2chips -= 150;
+            this.update_P2chips();
             this.state.pot += 150;
+            this.update_pot();
         }
         this.update_turn();
     }
@@ -112,10 +118,14 @@ class GamePage extends React.Component {
             //put chips in pot
             if (this.state.currTurn == this.state.Me){
                 this.state.P1chips -= 50;
+                this.update_P1chips();
                 this.state.pot += 50;
+                this.update_pot();
             } else {
                 this.state.P2chips -= 50;
+                this.update_P2chips();
                 this.state.pot += 50;
+                this.update_pot();
             }
             //show flop
             fire.database().ref("/Root/GameID/").once('value', snapshot => {
@@ -130,14 +140,19 @@ class GamePage extends React.Component {
             })
             //update where_in game
             this.state.where_in_game = "flop";
+            this.update_where_in_game();
         } else if(this.state.where_in_game == "flop"){
             //put chips in pot
             if (this.state.currTurn == this.state.Me){
                 this.state.P1chips -= 50;
+                this.update_P1chips();
                 this.state.pot += 50;
+                this.update_pot();
             } else {
                 this.state.P2chips -= 50;
+                this.update_P2chips();
                 this.state.pot += 50;
+                this.update_pot();
             }
             //show turn
             fire.database().ref("/Root/GameID/").once('value', snapshot => {
@@ -148,14 +163,19 @@ class GamePage extends React.Component {
             })
             //update where_in game
             this.state.where_in_game = "turn";
+            this.update_where_in_game();
         } else if (this.state.where_in_game == "turn"){
            //put chips in pot
            if (this.state.currTurn == this.state.Me){
                 this.state.P1chips -= 50;
+                this.update_P1chips();
                 this.state.pot += 50;
+                this.update_pot();
             } else {
                 this.state.P2chips -= 50;
+                this.update_P2chips();
                 this.state.pot += 50;
+                this.update_pot();
             }
             //show river
             fire.database().ref("/Root/GameID/").once('value', snapshot => {
@@ -166,18 +186,21 @@ class GamePage extends React.Component {
             })
             //update where_in game
             this.state.where_in_game = "river";
+            this.update_where_in_game();
         } else if (this.state.where_in_game == "river"){
             //compare hands
 
         }
         //reset num_checks
         this.state.num_checks = 0;
+        this.update_num_checks();
         //update turn;
         this.update_turn();
     }
 
     check(){
         this.state.num_checks ++;
+        this.update_num_checks();
         if (this.state.num_checks == 2){
             if (this.state.where_in_game == "start"){
                 //show flop
@@ -193,6 +216,7 @@ class GamePage extends React.Component {
                 })
                 //update where_in game
                 this.state.where_in_game = "flop";
+                this.update_where_in_game();
             } else if (this.state.where_in_game == "flop"){
                 //show turn
                 fire.database().ref("/Root/GameID/").once('value', snapshot => {
@@ -203,6 +227,7 @@ class GamePage extends React.Component {
                 })
                 //update where_in game
                 this.state.where_in_game = "turn";
+                this.update_where_in_game();
             } else if (this.state.where_in_game == "turn"){
                 //show river
                 fire.database().ref("/Root/GameID/").once('value', snapshot => {
@@ -213,6 +238,7 @@ class GamePage extends React.Component {
                 })
                 //update where_in game
                 this.state.where_in_game = "river";
+                this.update_where_in_game();
             } else if (this.state.where_in_game == "river"){
                 //compare hands
 
@@ -220,6 +246,7 @@ class GamePage extends React.Component {
 
             //reset num_checks
             this.state.num_checks = 0;
+            this.update_num_checks();
         }
         this.update_turn();
     }
@@ -228,11 +255,14 @@ class GamePage extends React.Component {
         //give pot to other player
         if (this.state.currTurn == this.state.Me){
             this.state.P1chips += this.state.pot;
+            this.update_P1chips();
         } else {
             this.state.P2chips += this.state.pot;
+            this.update_P2chips();
         }
         //reset pot
         this.state.pot = 0;
+        this.update_pot();
         //end hand, flip cards. Will need to re deal
         this.state.Ca1 = "back";
         this.state.Ca2 = "back";
@@ -240,10 +270,57 @@ class GamePage extends React.Component {
         this.state.Ca4 = "back";
         this.state.Ca5 = "back";
         this.state.where_in_game = "end";
+        this.update_where_in_game();
         this.update_turn();
     }
 
 //------------------------------------Button Actions Above ---------------------------------------
+
+
+
+//------------------------------------Data Base Control Below ---------------------------------------
+
+    update_where_in_game(){
+        fire.database().ref("/Root/GameID/where_in_game").update({
+           where_in_game: this.state.where_in_game
+        })
+        fire.database().ref()
+    }
+
+    update_num_checks(){
+        fire.database().ref("/Root/GameID/num_checks").update({
+            num_checks: this.state.num_checks
+        })
+        fire.database().ref()
+    }
+
+    update_num_call(){
+        fire.database().ref("/Root/GameID/num_call").update({
+            num_call: this.state.num_call
+        })
+        fire.database().ref()
+    }
+
+    update_pot(){
+        fire.database().ref("/Root/GameID/pot").update({
+            pot: this.state.pot
+        })
+        fire.database().ref()
+    }
+
+    update_P1chips(P1chips){
+        fire.database().ref("/Root/GameID/P1chips").update({
+            P1chips: this.state.P1chips
+        })
+        fire.database().ref()
+    }
+
+    update_P2chips(){
+        fire.database().ref("/Root/GameID/P2chips").update({
+            P2chips: this.state.P2chips
+        })
+        fire.database().ref()
+    }
 
     upload_turn(){
         var whos_turn = "Player 1";
@@ -254,6 +331,26 @@ class GamePage extends React.Component {
     }
 
     update_turn(){
+        //update values from firebase
+        fire.database().ref("/Root/GameID/").once('value', snapshot => {
+            var P2Chips = snapshot.child("P2chips").child("P2chips").val()
+            var P1Chips = snapshot.child("P1chips").child("P1chips").val()
+            var where = snapshot.child("where_in_game").child("where_in_game").val()
+            var sPOT = snapshot.child("pot").child("pot").val()
+            var ncall = snapshot.child("num_call").child("num_call").val()
+            var nchecks = snapshot.child("num_checks").child("num_checks").val()
+                this.setState({
+                    P2chips: P2Chips,
+                    P1chips: P1Chips,
+                    where_in_game: where,
+                    pot: sPOT,
+                    num_call: ncall,
+                    num_checks: nchecks
+                })
+        })
+
+
+
         var turn = this.state.currTurn;
         if(turn == "Player 1"){
             var newTurn = "Player 2";
@@ -303,6 +400,12 @@ class GamePage extends React.Component {
     logout() {
         fire.auth().signOut();
     }
+
+//------------------------------------Data Base Control Above ---------------------------------------
+
+
+
+//------------------------------------Hand Comparisons Below ---------------------------------------
 
     get_card_img(card){
         if (card == ""){
@@ -354,7 +457,6 @@ class GamePage extends React.Component {
         }
     }
 
-
     full_house_check(current_cards){
         var reverse_sorted_hand = current_cards.sort(function(a, b) {return b-a;}); //Reverse sort to find the highest triple/pair first
         var triple_check = false;
@@ -403,7 +505,6 @@ class GamePage extends React.Component {
                 this.temp = this.get_value(reverse_sorted_hand[i]);
                 double_count = 1;
             }
-
         }
         if(pair_check = false){
             return [0,0]
@@ -411,8 +512,11 @@ class GamePage extends React.Component {
         return [triple_value, double_value];
     }
 
+//------------------------------------Hand Comparisons Above ---------------------------------------
 
-begin_game(){
+
+
+begin_hand(){
     var smallblind = "start";
     //show back of all cards at the begginning of the hand
     this.state.Ca1 = "back";
@@ -421,7 +525,9 @@ begin_game(){
     this.state.Ca4 = "back";
     this.state.Ca5 = "back";
     this.state.num_checks = 0;
+    this.update_num_checks();
     this.state.num_call = 0;
+    this.update_num_call();
     //switch blinds
     if (smallblind == "P1"){
         smallblind = "P2";
@@ -432,24 +538,20 @@ begin_game(){
     if (smallblind == "P1"){
         //update on display
         this.state.P1chips -= 25;
+        this.update_P1chips();
         this.state.P2chips -= 50;
+        this.update_P2chips();
     } else {
         //update on display
         this.state.P1chips -= 50;
+        this.update_P1chips();
         this.state.P2chips -= 25;
+        this.update_P2chips();
     }
     //add blinds to the pot
     this.state.pot = 75;
+    this.update_pot();
 }
-
-
-
-
-
-
-
-
-
 
     render() {
         return (
