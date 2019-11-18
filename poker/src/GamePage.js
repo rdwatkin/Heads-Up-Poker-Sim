@@ -29,7 +29,7 @@ class GamePage extends React.Component {
         this.state = {Ca1: "", Ca2: "", Ca3: "", Ca4: "", Ca5: "",
                       P1C1: "", P1C2: "", P2C1: "", P2C2: "", P1chips: "",
                       P2chips: "", pot: "", currTurn: "", P1: "", P2: "", Me: "",
-                      num_call: "", num_checks: "", where_in_game: "", cards_dealt: "" }
+                      num_call: "", num_checks: "", where_in_game: "" }
     }
 
     componentWillMount(){
@@ -72,7 +72,7 @@ class GamePage extends React.Component {
                 Me: whoAmI,
                 num_checks: 0,
                 num_call: 0,
-                cards_dealt: this.deal_nine_cards,
+                cards_dealt: this.deal_nine_cards(),
                 where_in_game: "start"
             }, this.begin_hand )
         })
@@ -382,17 +382,27 @@ class GamePage extends React.Component {
                 C1: this.state.cards_dealt[0],
                 C2: this.state.cards_dealt[1],
                 C3: this.state.cards_dealt[2],
+                C4: "back",
+                C5: "back"
         })
     }
 
     updateTurn(){
         fire.database().ref("/Root/GameID/").set({
-                C4: this.state.cards_dealt[3]
+                C1: this.state.cards_dealt[0],
+                C2: this.state.cards_dealt[1],
+                C3: this.state.cards_dealt[2],
+                C4: this.state.cards_dealt[3],
+                C5: "back"
         })
     }
 
     updateRiver(){
         fire.database().ref("/Root/GameID/").set({
+                C1: this.state.cards_dealt[0],
+                C2: this.state.cards_dealt[1],
+                C3: this.state.cards_dealt[2],
+                C4: this.state.cards_dealt[3],
                 C5: this.state.cards_dealt[4]
         })
     }
