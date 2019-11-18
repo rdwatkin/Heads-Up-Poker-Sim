@@ -567,6 +567,7 @@ begin_hand(){
         var sPOT = snapshot.child("pot").child("pot").val()
         var ncall = snapshot.child("num_call").child("num_call").val()
         var nchecks = snapshot.child("num_checks").child("num_checks").val()
+        var Nturn = snapshot.child("turn").child("currTurn").val()
         
             this.setState({
                 P2chips: P2Chips,
@@ -574,7 +575,8 @@ begin_hand(){
                 where_in_game: where,
                 pot: sPOT,
                 num_call: ncall,
-                num_checks: nchecks
+                num_checks: nchecks,
+                currTurn: Nturn
             })
     })    
 }
