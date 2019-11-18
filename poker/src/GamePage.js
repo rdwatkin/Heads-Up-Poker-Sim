@@ -202,8 +202,10 @@ class GamePage extends React.Component {
     check(){
         this.state.num_checks ++;
         this.update_num_checks();
+        console.log(this.state.num_checks);
         if (this.state.num_checks == 2){
             if (this.state.where_in_game == "start"){
+                console.log("wtf");
                 //show flop
                 fire.database().ref("/Root/GameID/").once('value', snapshot => {
                     var Car1 = snapshot.child("C1").val()
@@ -215,6 +217,7 @@ class GamePage extends React.Component {
                             Ca3: Car3
                         })
                 })
+                console.log("test");
                 //update where_in game
                 this.state.where_in_game = "flop";
                 this.update_where_in_game();
@@ -333,7 +336,7 @@ class GamePage extends React.Component {
 
     update_turn(){
         //update values from firebase
-        fire.database().ref("/Root/GameID/").once('value', snapshot => {
+        fire.database().ref("/Root/GameID/").on('value', snapshot => {
             var P2Chips = snapshot.child("P2chips").child("P2chips").val()
             var P1Chips = snapshot.child("P1chips").child("P1chips").val()
             var where = snapshot.child("where_in_game").child("where_in_game").val()
@@ -370,6 +373,9 @@ class GamePage extends React.Component {
                 currTurn: newTurn
             })
         }
+
+        /*
+
         //hide buttons when not your turn
         if (this.state.Me != this.state.currTurn){
             document.getElementById('Check').style.visibility='hidden';
@@ -385,6 +391,8 @@ class GamePage extends React.Component {
             document.getElementById('Raise').style.visibility='visible';
             document.getElementById('Fold').style.visibility='visible';
         }
+
+        */
     }
 
     upload_value_to_database(path, name, value){
@@ -522,6 +530,8 @@ begin_hand(){
     this.state.Ca3 = "back";
     this.state.Ca4 = "back";
     this.state.Ca5 = "back";
+    this.state.where_in_game = "start";
+    this.update_where_in_game();
     this.state.num_checks = 0;
     this.update_num_checks();
     this.state.num_call = 0;
@@ -557,6 +567,7 @@ begin_hand(){
         var sPOT = snapshot.child("pot").child("pot").val()
         var ncall = snapshot.child("num_call").child("num_call").val()
         var nchecks = snapshot.child("num_checks").child("num_checks").val()
+        
             this.setState({
                 P2chips: P2Chips,
                 P1chips: P1Chips,
@@ -565,9 +576,7 @@ begin_hand(){
                 num_call: ncall,
                 num_checks: nchecks
             })
-    })
-
-            
+    })    
 }
 
     render() {
@@ -585,11 +594,11 @@ begin_hand(){
  
                 <div style={{display: 'flex', justifyContent: 'center', height: "50%", margin: '10px'}}>
                 <h1 style={{textAlign: "center", margin: '30px'}}>Pot<br/> {this.state.pot}</h1>
-                    { this.get_card_img("back") }
-                    { this.get_card_img("back") }
-                    { this.get_card_img("back") }
-                    { this.get_card_img("back") }
-                    { this.get_card_img("back") }
+                    { this.get_card_img(this.state.Ca1) }
+                    { this.get_card_img(this.state.Ca2) }
+                    { this.get_card_img(this.state.Ca3) }
+                    { this.get_card_img(this.state.Ca4) }
+                    { this.get_card_img(this.state.Ca5) }
                 </div>
  
                 <div style={{display: 'flex', justifyContent: 'center', height: "100%", margin: '50px'}}>
