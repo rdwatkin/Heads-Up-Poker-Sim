@@ -77,6 +77,7 @@ class GamePage extends React.Component {
         })
     }
 
+
 //------------------------------------Button Actions Below ---------------------------------------
 
     //for now, going to make it bet 50 by default
@@ -348,9 +349,6 @@ class GamePage extends React.Component {
                     num_checks: nchecks
                 })
         })
-
-
-
         var turn = this.state.currTurn;
         if(turn == "Player 1"){
             var newTurn = "Player 2";
@@ -551,6 +549,25 @@ begin_hand(){
     //add blinds to the pot
     this.state.pot = 75;
     this.update_pot();
+    //update values from firebase
+    fire.database().ref("/Root/GameID/").on('value', snapshot => {
+        var P2Chips = snapshot.child("P2chips").child("P2chips").val()
+        var P1Chips = snapshot.child("P1chips").child("P1chips").val()
+        var where = snapshot.child("where_in_game").child("where_in_game").val()
+        var sPOT = snapshot.child("pot").child("pot").val()
+        var ncall = snapshot.child("num_call").child("num_call").val()
+        var nchecks = snapshot.child("num_checks").child("num_checks").val()
+            this.setState({
+                P2chips: P2Chips,
+                P1chips: P1Chips,
+                where_in_game: where,
+                pot: sPOT,
+                num_call: ncall,
+                num_checks: nchecks
+            })
+    })
+
+            
 }
 
     render() {
