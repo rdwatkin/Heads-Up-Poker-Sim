@@ -53,7 +53,6 @@ class GamePage extends React.Component {
             }else{
                 whoAmI = "Player2"
             }
-
             /* Set State Variables */
             this.setState({
                 Ca1: Car1,
@@ -174,6 +173,8 @@ class GamePage extends React.Component {
         } else if (this.state.where_in_game == "river"){
             //compare hands
 
+
+
         }
         //reset num_checks
         this.state.num_checks = 0;
@@ -185,13 +186,10 @@ class GamePage extends React.Component {
     check(){
         this.state.num_checks ++;
         this.update_num_checks();
-        console.log(this.state.num_checks);
         if (this.state.num_checks == 2){
             if (this.state.where_in_game == "start"){
-                console.log("wtf");
                 //show flop
                 this.updateFlop();
-                console.log("test");
                 //update where_in game
                 this.state.where_in_game = "flop";
                 this.update_where_in_game();
@@ -210,8 +208,9 @@ class GamePage extends React.Component {
             } else if (this.state.where_in_game == "river"){
                 //compare hands
 
-            }
 
+
+            }
             //reset num_checks
             this.state.num_checks = 0;
             this.update_num_checks();
@@ -228,75 +227,13 @@ class GamePage extends React.Component {
             this.state.P2chips += this.state.pot;
             this.update_P2chips();
         }
-
-
-
         fire.database().ref("/Root/GameID/").once('value', snapshot => {
-            /*
-            var currUser = fire.auth().currentUser.uid;
-            var Car1 = snapshot.child("C1").val()
-            var Car2 = snapshot.child("C2").val()
-            var Car3 = snapshot.child("C3").val()
-            var Car4 = snapshot.child("C4").val()
-            var Car5 = snapshot.child("C5").val()
-            var P1Ca1 = snapshot.child(currUser).child("C1").val()
-            var P1Ca2 = snapshot.child(currUser).child("C2").val()
-            var Player1 = snapshot.child("Player1").val();
-            var Player2 = snapshot.child("Player2").val();
-            var Fturn = snapshot.child("turn").child("currTurn").val()
-            var whoAmI = "";
-            if (currUser == Player1){
-                whoAmI = "Player1"
-            }else{
-                whoAmI = "Player2"
-            }
-            
-            */
             /* Set State Variables */
             this.setState({
                 cards_dealt: this.deal_nine_cards(),
-                /*
-                Ca1: Car1,
-                Ca2: Car2,
-                Ca3: Car3,
-                Ca4: Car4,
-                Ca5: Car5,
-                P1C1: P1Ca1,
-                P1C2: P1Ca2,
-                P1: Player1,
-                P2: Player2,
-                P1chips: 1000,
-                P2chips: 1000,
-                pot: 0,
-                currTurn: Fturn,
-                Me: whoAmI,
-                num_checks: 0,
-                num_call: 0,
-                */
-                
                 where_in_game: "start"
             }, this.begin_hand )
         })
-
-
-
-
-
-        //this.begin_hand();
-        /*
-        //reset pot
-        this.state.pot = 0;
-        this.update_pot();
-        //end hand, flip cards. Will need to re deal
-        this.state.Ca1 = "back";
-        this.state.Ca2 = "back";
-        this.state.Ca3 = "back";
-        this.state.Ca4 = "back";
-        this.state.Ca5 = "back";
-        this.state.where_in_game = "end";
-        this.update_where_in_game();
-        this.update_turn();
-        */
     }
 
 //------------------------------------Button Actions Above ---------------------------------------
@@ -304,7 +241,6 @@ class GamePage extends React.Component {
 
 
 //------------------------------------Data Base Control Below ---------------------------------------
-
 
     update_where_in_game(){
         fire.database().ref("/Root/GameID/where_in_game").update({
@@ -334,15 +270,15 @@ class GamePage extends React.Component {
         fire.database().ref()
     }
 
-    update_P1chips(P1chips){
-        fire.database().ref("/Root/GameID/P1chips").update({
+    update_P1chips(){
+        fire.database().ref("/Root/GameID/").update({
             P1chips: this.state.P1chips
         })
         fire.database().ref()
     }
 
     update_P2chips(){
-        fire.database().ref("/Root/GameID/P2chips").update({
+        fire.database().ref("/Root/GameID/").update({
             P2chips: this.state.P2chips
         })
         fire.database().ref()
@@ -356,26 +292,17 @@ class GamePage extends React.Component {
         fire.database().ref()
     }
 
+
+
+
+
+
+
+
+//update turn has issue where not showing whose turn it is properly
+
+
     update_turn(){
-        /*
-        //update values from firebase
-        fire.database().ref("/Root/GameID/").on('value', snapshot => {
-            var P2Chips = snapshot.child("P2chips").child("P2chips").val()
-            var P1Chips = snapshot.child("P1chips").child("P1chips").val()
-            var where = snapshot.child("where_in_game").child("where_in_game").val()
-            var sPOT = snapshot.child("pot").child("pot").val()
-            var ncall = snapshot.child("num_call").child("num_call").val()
-            var nchecks = snapshot.child("num_checks").child("num_checks").val()
-                this.setState({
-                    P2chips: P2Chips,
-                    P1chips: P1Chips,
-                    where_in_game: where,
-                    pot: sPOT,
-                    num_call: ncall,
-                    num_checks: nchecks
-                })
-        })
-        */
         var turn = this.state.currTurn;
         if(turn == "Player 1"){
             var newTurn = "Player 2";
@@ -397,8 +324,6 @@ class GamePage extends React.Component {
                 currTurn: newTurn
             })
         }
-
-        
         /*
         //hide buttons when not your turn
         if (this.state.Me != this.state.currTurn){
@@ -416,7 +341,6 @@ class GamePage extends React.Component {
             document.getElementById('Fold').style.visibility='visible';
         }
         */
-        
     }
 
     upload_value_to_database(path, name, value){
@@ -431,12 +355,6 @@ class GamePage extends React.Component {
         fire.auth().signOut();
     }
 
-//------------------------------------Data Base Control Above ---------------------------------------
-
-
-
-//------------------------------------Hand Comparisons Below ---------------------------------------
-    
     resetBoard(){
         fire.database().ref("/Root/GameID/").set({
             Player1: this.state.P1,
@@ -446,15 +364,15 @@ class GamePage extends React.Component {
             C3: "back",
             C4: "back",
             C5: "back"
-    })
-    fire.database().ref("/Root/GameID/"+this.state.P1).set({
-        C1: "back",
-        C2: "back"
-    });
-    fire.database().ref("/Root/GameID/"+this.state.P2).set({
-        C1: "back",
-        C2: "back"
-    });
+        })
+        fire.database().ref("/Root/GameID/"+this.state.P1).set({
+            C1: "back",
+            C2: "back"
+        });
+        fire.database().ref("/Root/GameID/"+this.state.P2).set({
+            C1: "back",
+            C2: "back"
+        });
     }
 
     dealPlayers(){
@@ -468,15 +386,6 @@ class GamePage extends React.Component {
     })
     }
 
-/*
-    updateMyCards(){
-        fire.database().ref("/Root/GameID/").set({
-            C1: this.state.cards_dealt[5],
-            C2: this.state.cards_dealt[6]
-    })
-    }
-*/
-
     updateFlop(){
         fire.database().ref("/Root/GameID/").set({
                 C1: this.state.cards_dealt[0],
@@ -485,8 +394,8 @@ class GamePage extends React.Component {
                 C4: "back",
                 C5: "back",
                 pot: this.state.pot,
-                P1Chips: this.state.P1chips,
-                P2Chips: this.state.P2chips
+                P1chips: this.state.P1chips,
+                P2chips: this.state.P2chips
         })
         fire.database().ref("/Root/GameID/" + this.state.P1).set({
             C1: this.state.cards_dealt[5],
@@ -504,7 +413,18 @@ class GamePage extends React.Component {
             C2: this.state.cards_dealt[1],
             C3: this.state.cards_dealt[2],
             C4: this.state.cards_dealt[3],
-            C5: "back"
+            C5: "back",
+            pot: this.state.pot,
+            P1chips: this.state.P1chips,
+            P2chips: this.state.P2chips
+        })
+        fire.database().ref("/Root/GameID/" + this.state.P1).set({
+            C1: this.state.cards_dealt[5],
+            C2: this.state.cards_dealt[6]
+         })
+        fire.database().ref("/Root/GameID/" + this.state.P2).set({
+            C1: this.state.cards_dealt[7],
+            C2: this.state.cards_dealt[8]
         })
     }
 
@@ -515,6 +435,17 @@ class GamePage extends React.Component {
             C3: this.state.cards_dealt[2],
             C4: this.state.cards_dealt[3],
             C5: this.state.cards_dealt[4],
+            pot: this.state.pot,
+            P1chips: this.state.P1chips,
+            P2chips: this.state.P2chips
+        })
+        fire.database().ref("/Root/GameID/" + this.state.P1).set({
+            C1: this.state.cards_dealt[5],
+            C2: this.state.cards_dealt[6]
+         })
+        fire.database().ref("/Root/GameID/" + this.state.P2).set({
+            C1: this.state.cards_dealt[7],
+            C2: this.state.cards_dealt[8]
         })
     }
 
@@ -549,6 +480,12 @@ class GamePage extends React.Component {
         let imgsrc = images('./'+card+'.png');
         return <img src={imgsrc} style={{height: "10em", marginRight: '10px'}}/>;
     }
+
+//------------------------------------Data Base Control Above ---------------------------------------
+
+
+
+//------------------------------------Hand Comparisons Below ---------------------------------------
 
     get_value(card){
         var val = card.slice(0, card.length);
@@ -651,18 +588,18 @@ class GamePage extends React.Component {
 
 
 
+//------------------------------------Begin Hand and HTML Below ---------------------------------------
+
 begin_hand(){
     var smallblind = "start";
     //show back of all cards at the begginning of the hand
     this.resetBoard();
     this.dealPlayers();
-    
     this.state.Ca1 = "back";
     this.state.Ca2 = "back";
     this.state.Ca3 = "back";
     this.state.Ca4 = "back";
     this.state.Ca5 = "back";
-    
     this.state.where_in_game = "start";
     this.update_where_in_game();
     this.state.num_checks = 0;
@@ -695,8 +632,8 @@ begin_hand(){
     //update values from firebase
     fire.database().ref("/Root/GameID/").on('value', snapshot => {
         var currUser = fire.auth().currentUser.uid;
-        var P2Chips = snapshot.child("P2chips").child("P2chips").val()
-        var P1Chips = snapshot.child("P1chips").child("P1chips").val()
+        var P2Chips = snapshot.child("P2chips").val()
+        var P1Chips = snapshot.child("P1chips").val()
         var where = snapshot.child("where_in_game").child("where_in_game").val()
         var sPOT = snapshot.child("pot").val()
         var ncall = snapshot.child("num_call").child("num_call").val()
@@ -709,7 +646,6 @@ begin_hand(){
         var Car5 = snapshot.child("C5").val()
         var P1Ca1 = snapshot.child(currUser).child("C1").val()
         var P1Ca2 = snapshot.child(currUser).child("C2").val()
-        
             this.setState({
                 Ca1: Car1,
                 Ca2: Car2,
