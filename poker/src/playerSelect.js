@@ -3,6 +3,7 @@ import fire from './config/fire';
 import GamePage from './GamePage.js';
 import { Link } from 'react-router-dom';
 import Route from 'react-router-dom/Route';
+const GameState = require('./GameState');
 
 class playerSelect extends React.Component {
 
@@ -74,22 +75,12 @@ class playerSelect extends React.Component {
 
     generateInitialGameState = () => {
         var cards_dealt = this.deal_nine_cards();
-        var user1 = this.state.user1.uid
-        var user2 = this.state.user2.key;
+    
+        var game = new GameState(this.state.user1.uid, this.state.user2.key);
+        game.distribute_cards(cards_dealt);
+
         fire.database().ref("/Root/GameID/").set({
-                C1: cards_dealt[0],
-                C2: cards_dealt[1],
-                C3: cards_dealt[2],
-                C4: cards_dealt[3],
-                C5: cards_dealt[4],
-        })
-        fire.database().ref("/Root/GameID/"+user1).set({
-            C1: cards_dealt[5],
-            C2: cards_dealt[6],
-        });
-        fire.database().ref("/Root/GameID/"+user2).set({
-            C1: cards_dealt[7],
-            C2: cards_dealt[8]
+            GAME: game
         });
         this.props.history.push('./gamepage');
     }

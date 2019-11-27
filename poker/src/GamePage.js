@@ -27,91 +27,51 @@ class GamePage extends React.Component {
     constructor() {
         super()
         this.get_card_img = this.get_card_img.bind(this);
-        this.state = {Ca1: "", Ca2: "", Ca3: "", Ca4: "", Ca5: "",
-                      P1C1: "", P1C2: "", P2C1: "", P2C2: "", P1chips: "",
-                      P2chips: "", pot: "", currTurn: "" }
+       this.state = {GS: ""};
     }
 
     
 
     componentWillMount(){
-        this.upload_turn();
-        //Get Cards From Database
         fire.database().ref("/Root/GameID/").once('value', snapshot => {
-            var currUser = fire.auth().currentUser.uid;
-            var Car1 = snapshot.child("C1").val()
-            var Car2 = snapshot.child("C2").val()
-            var Car3 = snapshot.child("C3").val()
-            var Car4 = snapshot.child("C4").val()
-            var Car5 = snapshot.child("C5").val()
-            var P1Ca1 = snapshot.child(currUser).child("C1").val()
-            var P1Ca2 = snapshot.child(currUser).child("C2").val()
-            var Fturn = snapshot.child("turn").child("currTurn").val()
-            //var Player1chips = 100;
-            //var Player2chips = 100;
-            /* Set State Variables */
-            this.setState({
-                Ca1: Car1,
-                Ca2: Car2,
-                Ca3: Car3,
-                Ca4: Car4,
-                Ca5: Car5,
-                P1C1: P1Ca1,
-                P1C2: P1Ca2,
-                P1chips: 1000,
-                P2chips: 1000,
-                pot: 0,
-                currTurn: Fturn
-            })
-        })
+            var game = snapshot.child("GAME").val();
+            this.curUser = 1;
+            this.curFoe = 0;
+            if(game.players[0] == fire.auth().currentUser.uid){
+                this.curUser = 0;
+                this.curFoe = 1;
+            }
+            this.setState({GS: game})
+        });
     }
 
-    upload_turn(){
-        var whos_turn = "Player 1";
-        fire.database().ref("/Root/GameID/turn").set({
-            currTurn: whos_turn
-        })
+    // Update the game state on the database
+    upload_game_state(){
+        var gs = this.state.GS;
+        fire.database().ref("/Root/GameID/").set({
+            GAME: gs
+        });
         fire.database().ref()
     }
 
     update_turn(){
-        var turn = this.state.currTurn;
-        if(turn == "Player 1"){
-            var newTurn = "Player 2";
-            fire.database().ref("/Root/GameID/turn").update({
-                currTurn: newTurn
-            })
-            fire.database().ref()
-            this.setState({
-                currTurn: newTurn
-            })
+        var game = this.state.GS;
+        if(game.curTurn == "Player 1"){  
+            game.curTurn = "Player 2";
         }
         else{
-            var newTurn = "Player 1";
-            fire.database().ref("/Root/GameID/turn").update({
-                currTurn: newTurn
-            })
-            fire.database().ref()
-            this.setState({
-                currTurn: newTurn
-            })
+            game.curTurn = "Player 1";
         }
+        this.setState({GS: game});
+        this.upload_game_state();
     }
 
-    upload_value_to_database(path, name, value){
-        return function() {
-            fire.database().ref(path).set({
-                name: value
-            });
-        }
-    }
- 
     logout() {
         fire.auth().signOut();
     }
 
     get_card_img(card){
-        if (card == ""){
+        if (card == "" || card == undefined){
             card = "back";
         }
         let imgsrc = images('./'+card+'.png');
@@ -381,29 +341,29 @@ class GamePage extends React.Component {
         return (
             <div>
                 <div style={{display: 'flex', justifyContent: 'center', height: "50%", margin: '50px'}}>
-                    <h1><u>It is {this.state.currTurn}'s turn</u></h1>
+                    <h1><u>It is {this.state.GS.curTurn}'s turn</u></h1>
                 </div>
                 <div style={{display: 'flex', justifyContent: 'center', height: "50%", margin: '50px'}}>
                     <h1 style={{textAlign: "center", margin: '30px', marginLeft: '210px'}}>
-                        Opponent Stack<br/> {this.state.P2chips} </h1>
+                        Opponent Stack<br/> {this.state.GS.pChips[this.curFoe]} </h1>
                     { this.get_card_img("back") }
                     { this.get_card_img("back") }
                 </div>
  
                 <div style={{display: 'flex', justifyContent: 'center', height: "50%", margin: '10px'}}>
-                <h1 style={{textAlign: "center", margin: '30px'}}>Pot<br/> {this.state.pot}</h1>
-                    { this.get_card_img(this.state.Ca1) }
-                    { this.get_card_img(this.state.Ca2) }
-                    { this.get_card_img(this.state.Ca3) }
-                    { this.get_card_img(this.state.Ca4) }
-                    { this.get_card_img(this.state.Ca5) }
+                <h1 style={{textAlign: "center", margin: '30px'}}>Pot<br/> {this.state.GS.pot}</h1>
+                    { this.get_card_img(this.state.GS.middle_cards[0]) }
+                    { this.get_card_img(this.state.GS.middle_cards[1]) }
+                    { this.get_card_img(this.state.GS.middle_cards[2]) }
+                    { this.get_card_img(this.state.GS.middle_cards[3]) }
+                    { this.get_card_img(this.state.GS.middle_cards[4]) }
                 </div>
  
                 <div style={{display: 'flex', justifyContent: 'center', height: "100%", margin: '50px'}}>
                     <h1 style={{textAlign: "center", margin: '30px', marginLeft: '300px'}}>
-                        My Stack<br/> {this.state.P1chips} </h1>
-                    { this.get_card_img(this.state.P1C1) }
-                    { this.get_card_img(this.state.P1C2) }
+                        My Stack<br/> {this.state.GS.pChips[this.curUser]} </h1>
+                    { this.get_card_img(this.state.GS.pHands[this.curUser][0]) }
+                    { this.get_card_img(this.state.GS.pHands[this.curUser][1]) }
  
                     <div style={{display: 'flex', justifyContent: 'center', height: "100%", flexDirection: 'column'}}>
                         <button style={{margin: '7px', marginTop: '15px'}} onClick={() => {this.update_turn()}}>CHECK</button>
@@ -417,6 +377,7 @@ class GamePage extends React.Component {
             </div>
         )
     }
+   
 }
  
 export default GamePage;

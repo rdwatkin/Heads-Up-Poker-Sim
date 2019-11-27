@@ -3,21 +3,17 @@ class GameState {
         // MAIN VARIABLES   
         this.players = [p1, p2];
         this.curPlayer = 0;
-        this.curTurn = 0;
+        this.curTurn = "Player 1";
         
         // CHIP VARIABLES
         this.pot = 0;
         this.pChips = [1000, 1000];
         
         // CARD VARIABLES
-        this.middleCards = [];
+        this.middle_cards = [];
         this.pHands = [];
-
-        // Randomly generate cards in the middle
-        this.middleCards = []; // GENERATE CARDS HERE WHEN COMBINING CODE LATER
-        // Randomly distribute cards to each player
         for (var i = 0; i < 2; i++){
-            this.pHands[i] = []; // GENERATE HAND HERE WHEN COMBINING CODE LATER
+            this.pHands[i] = [];
         }
     }
 
@@ -26,6 +22,35 @@ class GameState {
         update_turn()
         game_control()
     */
+
+    // Update the cards in the game
+    distribute_cards(cards){
+        for(var i = 0; i < 9; i++){
+            if(i < 5){
+                this.middle_cards[i] = cards[i];
+            }
+            else if(i < 7){
+                this.pHands[0][i-5] = cards[i];
+            }
+            else{
+                this.pHands[1][i-7] = cards[i];
+            }
+        }
+    }
+
+    // Returns the player's hand
+    get_hand(player){
+        if(player == this.players[0])
+            return this.p1Hand;
+        return this.p2Hand;
+    }
+
+    get_chips(player){
+        if(player == this.players[0])
+            return this.pChips[0];
+        return this.pChips[1];
+    }
+
 }
  
 module.exports = GameState;
