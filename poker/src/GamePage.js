@@ -29,7 +29,8 @@ class GamePage extends React.Component {
         this.state = {Ca1: "", Ca2: "", Ca3: "", Ca4: "", Ca5: "",
                       P1C1: "", P1C2: "", P2C1: "", P2C2: "", P1chips: "",
                       P2chips: "", pot: "", currTurn: "", P1: "", P2: "", Me: "",
-                      num_call: "", num_checks: "", where_in_game: "", P1email: "", P2email: "", Turn_Email: "", smallblind: ""}
+                      num_call: "", num_checks: "", where_in_game: "", P1email: "", 
+                      P2email: "", Turn_Email: "", smallblind: "", cur_bet: ""}
     }
 
     componentWillMount(){
@@ -78,7 +79,8 @@ class GamePage extends React.Component {
                 Turn_Email: PoneEmail,
                 smallblind: "Begin",
                 cards_dealt: this.deal_nine_cards(),
-                where_in_game: "start"
+                where_in_game: "start",
+                cur_bet: 0
             }, this.begin_hand )
         })
     }
@@ -90,16 +92,20 @@ class GamePage extends React.Component {
     //for now, going to make it bet 50 by default
     bet(){
         var amount = document.getElementById("Bet_amount").value;
+        amount = parseInt(amount);
+        fire.database().ref("/Root/GameID/").update({
+            cur_bet: amount
+        })
         //adjust chips and pot size
         if (this.state.currTurn == this.state.Me){
-            this.state.P1chips -= 50;
+            this.state.P1chips -= amount;
             this.update_P1chips();
-            this.state.pot += 50;
+            this.state.pot += amount;
             this.update_pot();
         } else {
-            this.state.P2chips -= 50;
+            this.state.P2chips -= amount;
             this.update_P2chips();
-            this.state.pot += 50;
+            this.state.pot += amount;
             this.update_pot();
         }
         //adjust turn
@@ -109,15 +115,19 @@ class GamePage extends React.Component {
     //need to edit
     raise(){
         var amount = document.getElementById("Raise_amount").value;
+        amount = parseInt(amount);
+        fire.database().ref("/Root/GameID/").update({
+            cur_bet: amount - this.state.cur_bet
+        })
         if (this.state.currTurn == this.state.Me){
-            this.state.P1chips -= 150;
+            this.state.P1chips -= amount;
             this.update_P1chips();
-            this.state.pot += 150;
+            this.state.pot += amount;
             this.update_pot();
         } else {
-            this.state.P2chips -= 150;
+            this.state.P2chips -= amount;
             this.update_P2chips();
-            this.state.pot += 150;
+            this.state.pot += amount
             this.update_pot();
         }
         this.update_turn();
@@ -127,14 +137,14 @@ class GamePage extends React.Component {
         if(this.state.where_in_game == "start"){
             //put chips in pot
             if (this.state.currTurn == this.state.Me){
-                this.state.P1chips -= 50;
+                this.state.P1chips -= this.state.cur_bet;
                 this.update_P1chips();
-                this.state.pot += 50;
+                this.state.pot += this.state.cur_bet;
                 this.update_pot();
             } else {
-                this.state.P2chips -= 50;
+                this.state.P2chips -= this.state.cur_bet;
                 this.update_P2chips();
-                this.state.pot += 50;
+                this.state.pot += this.state.cur_bet;
                 this.update_pot();
             }
             //show flop
@@ -145,14 +155,14 @@ class GamePage extends React.Component {
         } else if(this.state.where_in_game == "flop"){
             //put chips in pot
             if (this.state.currTurn == this.state.Me){
-                this.state.P1chips -= 50;
+                this.state.P1chips -= this.state.cur_bet;
                 this.update_P1chips();
-                this.state.pot += 50;
+                this.state.pot += this.state.cur_bet;
                 this.update_pot();
             } else {
-                this.state.P2chips -= 50;
+                this.state.P2chips -= this.state.cur_bet;
                 this.update_P2chips();
-                this.state.pot += 50;
+                this.state.pot += this.state.cur_bet;
                 this.update_pot();
             }
             //show turn
@@ -163,14 +173,14 @@ class GamePage extends React.Component {
         } else if (this.state.where_in_game == "turn"){
            //put chips in pot
            if (this.state.currTurn == this.state.Me){
-                this.state.P1chips -= 50;
+                this.state.P1chips -= this.state.cur_bet;
                 this.update_P1chips();
-                this.state.pot += 50;
+                this.state.pot += this.state.cur_bet;
                 this.update_pot();
             } else {
-                this.state.P2chips -= 50;
+                this.state.P2chips -= this.state.cur_bet;
                 this.update_P2chips();
-                this.state.pot += 50;
+                this.state.pot += this.state.cur_bet;
                 this.update_pot();
             }
             //show river
@@ -299,16 +309,6 @@ class GamePage extends React.Component {
         })
         fire.database().ref()
     }
-
-
-
-
-
-
-
-
-//update turn has issue where not showing whose turn it is properly
-
 
     update_turn(){
         var turn = this.state.currTurn;
@@ -724,6 +724,7 @@ begin_hand(){
         var currUser = fire.auth().currentUser.uid;
         var P2Chips = snapshot.child("P2chips").val()
         var P1Chips = snapshot.child("P1chips").val()
+        var current_bet = snapshot.child("cur_bet").val()
         var where = snapshot.child("where_in_game").child("where_in_game").val()
         var sPOT = snapshot.child("pot").val()
         var ncall = snapshot.child("num_call").child("num_call").val()
@@ -750,7 +751,8 @@ begin_hand(){
                 pot: sPOT,
                 num_call: ncall,
                 num_checks: nchecks,
-                currTurn: Nturn
+                currTurn: Nturn,
+                cur_bet: current_bet
             })
     })    
 }
