@@ -29,7 +29,7 @@ class GamePage extends React.Component {
         this.state = {Ca1: "", Ca2: "", Ca3: "", Ca4: "", Ca5: "",
                       P1C1: "", P1C2: "", P2C1: "", P2C2: "", P1chips: "",
                       P2chips: "", pot: "", currTurn: "", P1: "", P2: "", Me: "",
-                      num_call: "", num_checks: "", where_in_game: "" }
+                      num_call: "", num_checks: "", where_in_game: "", P1email: "", P2email: "", Turn_Email: "", smallblind: ""}
     }
 
     componentWillMount(){
@@ -47,6 +47,8 @@ class GamePage extends React.Component {
             var Player1 = snapshot.child("Player1").val();
             var Player2 = snapshot.child("Player2").val();
             var Fturn = snapshot.child("turn").child("currTurn").val()
+            var PoneEmail = snapshot.child("Player1_Email").child("email").val()
+            var PtwoEmail = snapshot.child("Player2_Email").child("email").val()
             var whoAmI = "";
             if (currUser == Player1){
                 whoAmI = "Player1"
@@ -71,6 +73,10 @@ class GamePage extends React.Component {
                 Me: whoAmI,
                 num_checks: 0,
                 num_call: 0,
+                P1email: PoneEmail,
+                P2email: PtwoEmail,
+                Turn_Email: PoneEmail,
+                smallblind: "Begin",
                 cards_dealt: this.deal_nine_cards(),
                 where_in_game: "start"
             }, this.begin_hand )
@@ -83,6 +89,7 @@ class GamePage extends React.Component {
 
     //for now, going to make it bet 50 by default
     bet(){
+        var amount = document.getElementById("Bet_amount").value;
         //adjust chips and pot size
         if (this.state.currTurn == this.state.Me){
             this.state.P1chips -= 50;
@@ -101,6 +108,7 @@ class GamePage extends React.Component {
 
     //need to edit
     raise(){
+        var amount = document.getElementById("Raise_amount").value;
         if (this.state.currTurn == this.state.Me){
             this.state.P1chips -= 150;
             this.update_P1chips();
@@ -304,6 +312,8 @@ class GamePage extends React.Component {
 
     update_turn(){
         var turn = this.state.currTurn;
+        var P1 = this.state.P1email;
+        var P2 = this.state.P2email;
         if(turn == "Player 1"){
             var newTurn = "Player 2";
             fire.database().ref("/Root/GameID/turn").update({
@@ -311,7 +321,8 @@ class GamePage extends React.Component {
             })
             fire.database().ref()
             this.setState({
-                currTurn: newTurn
+                currTurn: newTurn,
+                Turn_Email: P2
             })
         }
         else{
@@ -321,7 +332,8 @@ class GamePage extends React.Component {
             })
             fire.database().ref()
             this.setState({
-                currTurn: newTurn
+                currTurn: newTurn,
+                Turn_Email: P1
             })
         }
         /*
@@ -356,7 +368,7 @@ class GamePage extends React.Component {
     }
 
     resetBoard(){
-        fire.database().ref("/Root/GameID/").set({
+        fire.database().ref("/Root/GameID/").update({
             Player1: this.state.P1,
             Player2: this.state.P2,
             C1: "back",
@@ -376,18 +388,44 @@ class GamePage extends React.Component {
     }
 
     dealPlayers(){
-        fire.database().ref("/Root/GameID/" + this.state.P1).set({
+        fire.database().ref("/Root/GameID/" + this.state.P1).update({
             C1: this.state.cards_dealt[5],
             C2: this.state.cards_dealt[6]
     })
-        fire.database().ref("/Root/GameID/" + this.state.P2).set({
+        fire.database().ref("/Root/GameID/" + this.state.P2).update({
             C1: this.state.cards_dealt[7],
             C2: this.state.cards_dealt[8]
     })
     }
 
     updateFlop(){
-        fire.database().ref("/Root/GameID/").set({
+        //set current turn to small blind
+        var P1 = this.state.P1email;
+        var P2 = this.state.P2email;
+        var SB = this.state.smallblind;
+        if(SB == "P2"){
+            var newTurn = "Player 2";
+            fire.database().ref("/Root/GameID/turn").update({
+                currTurn: newTurn
+            })
+            fire.database().ref()
+            this.setState({
+                currTurn: newTurn,
+                Turn_Email: P2
+            })
+        }
+        else{
+            var newTurn = "Player 1";
+            fire.database().ref("/Root/GameID/turn").update({
+                currTurn: newTurn
+            })
+            fire.database().ref()
+            this.setState({
+                currTurn: newTurn,
+                Turn_Email: P1
+            })
+        }
+        fire.database().ref("/Root/GameID/").update({
                 C1: this.state.cards_dealt[0],
                 C2: this.state.cards_dealt[1],
                 C3: this.state.cards_dealt[2],
@@ -408,7 +446,33 @@ class GamePage extends React.Component {
     }
 
     updateTurn(){
-        fire.database().ref("/Root/GameID/").set({
+        //set current turn to small blind
+        var P1 = this.state.P1email;
+        var P2 = this.state.P2email;
+        var SB = this.state.smallblind;
+        if(SB == "P2"){
+            var newTurn = "Player 2";
+            fire.database().ref("/Root/GameID/turn").update({
+                currTurn: newTurn
+            })
+            fire.database().ref()
+            this.setState({
+                currTurn: newTurn,
+                Turn_Email: P2
+            })
+        }
+        else{
+            var newTurn = "Player 1";
+            fire.database().ref("/Root/GameID/turn").update({
+                currTurn: newTurn
+            })
+            fire.database().ref()
+            this.setState({
+                currTurn: newTurn,
+                Turn_Email: P1
+            })
+        }
+        fire.database().ref("/Root/GameID/").update({
             C1: this.state.cards_dealt[0],
             C2: this.state.cards_dealt[1],
             C3: this.state.cards_dealt[2],
@@ -429,7 +493,33 @@ class GamePage extends React.Component {
     }
 
     updateRiver(){
-        fire.database().ref("/Root/GameID/").set({
+        //set current turn to small blind
+        var P1 = this.state.P1email;
+        var P2 = this.state.P2email;
+        var SB = this.state.smallblind;
+        if(SB == "P2"){
+            var newTurn = "Player 2";
+            fire.database().ref("/Root/GameID/turn").update({
+                currTurn: newTurn
+            })
+            fire.database().ref()
+            this.setState({
+                currTurn: newTurn,
+                Turn_Email: P2
+            })
+        }
+        else{
+            var newTurn = "Player 1";
+            fire.database().ref("/Root/GameID/turn").update({
+                currTurn: newTurn
+            })
+            fire.database().ref()
+            this.setState({
+                currTurn: newTurn,
+                Turn_Email: P1
+            })
+        }
+        fire.database().ref("/Root/GameID/").update({
             C1: this.state.cards_dealt[0],
             C2: this.state.cards_dealt[1],
             C3: this.state.cards_dealt[2],
@@ -591,7 +681,7 @@ class GamePage extends React.Component {
 //------------------------------------Begin Hand and HTML Below ---------------------------------------
 
 begin_hand(){
-    var smallblind = "start";
+    var smallblind = this.state.smallblind;
     //show back of all cards at the begginning of the hand
     this.resetBoard();
     this.dealPlayers();
@@ -669,7 +759,7 @@ begin_hand(){
         return (
             <div>
                 <div style={{display: 'flex', justifyContent: 'center', height: "50%", margin: '50px'}}>
-                    <h1><u>It is {this.state.currTurn}'s turn</u></h1>
+                    <h1><u>It is {this.state.Turn_Email}'s turn</u></h1>
                 </div>
                 <div style={{display: 'flex', justifyContent: 'center', height: "50%", margin: '50px'}}>
                     <h1 style={{textAlign: "center", margin: '30px', marginLeft: '210px'}}>
@@ -699,6 +789,10 @@ begin_hand(){
                         <button id = "Raise" style={{margin: '7px'}} onClick={() => {this.raise()}}>RAISE</button>
                         <button id = "Call" style={{margin: '7px'}} onClick={() => {this.call()}}>CALL</button>
                         <button id = "Fold" style={{margin: '7px'}} onClick={() => {this.fold()}}>FOLD</button>
+                    </div>
+                    <div style={{display: 'flex', justifyContent: 'center', height: "100%", flexDirection: 'column'}}>
+                        <input id="Bet_amount" style={{margin: '7px', marginTop: '50px'}} max={this.state.P1chips} min="25" type="number"/>
+                        <input id="Raise_amount" style={{margin: '7px'}} min="25" max={this.state.P1chips}  type="number"/>
                     </div>
                 </div>
             </div>
