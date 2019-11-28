@@ -93,9 +93,15 @@ class GamePage extends React.Component {
     bet(){
         var amount = document.getElementById("Bet_amount").value;
         amount = parseInt(amount);
+        this.state.cur_bet = amount;
         fire.database().ref("/Root/GameID/").update({
             cur_bet: amount
         })
+        if (this.state.cur_bet == 0){
+            document.getElementById('bet amount').style.visibility='hidden';
+        } else {
+            document.getElementById('bet amount').style.visibility='visible';
+        }
         //adjust chips and pot size
         if (this.state.currTurn == this.state.Me){
             this.state.P1chips -= amount;
@@ -119,6 +125,11 @@ class GamePage extends React.Component {
         fire.database().ref("/Root/GameID/").update({
             cur_bet: amount - this.state.cur_bet
         })
+        if (this.state.cur_bet == 0){
+            document.getElementById('bet amount').style.visibility='hidden';
+        } else {
+            document.getElementById('bet amount').style.visibility='visible';
+        }
         if (this.state.currTurn == this.state.Me){
             this.state.P1chips -= amount;
             this.update_P1chips();
@@ -134,55 +145,31 @@ class GamePage extends React.Component {
     }
 
     call(){
+        //put chips in pot
+        if (this.state.currTurn == this.state.Me){
+            this.state.P1chips -= this.state.cur_bet;
+            this.update_P1chips();
+            this.state.pot += this.state.cur_bet;
+            this.update_pot();
+        } else {
+            this.state.P2chips -= this.state.cur_bet;
+            this.update_P2chips();
+            this.state.pot += this.state.cur_bet;
+            this.update_pot();
+        }
         if(this.state.where_in_game == "start"){
-            //put chips in pot
-            if (this.state.currTurn == this.state.Me){
-                this.state.P1chips -= this.state.cur_bet;
-                this.update_P1chips();
-                this.state.pot += this.state.cur_bet;
-                this.update_pot();
-            } else {
-                this.state.P2chips -= this.state.cur_bet;
-                this.update_P2chips();
-                this.state.pot += this.state.cur_bet;
-                this.update_pot();
-            }
             //show flop
             this.updateFlop()
             //update where_in game
             this.state.where_in_game = "flop";
             this.update_where_in_game();
         } else if(this.state.where_in_game == "flop"){
-            //put chips in pot
-            if (this.state.currTurn == this.state.Me){
-                this.state.P1chips -= this.state.cur_bet;
-                this.update_P1chips();
-                this.state.pot += this.state.cur_bet;
-                this.update_pot();
-            } else {
-                this.state.P2chips -= this.state.cur_bet;
-                this.update_P2chips();
-                this.state.pot += this.state.cur_bet;
-                this.update_pot();
-            }
             //show turn
             this.updateTurn()
             //update where_in game
             this.state.where_in_game = "turn";
             this.update_where_in_game();
         } else if (this.state.where_in_game == "turn"){
-           //put chips in pot
-           if (this.state.currTurn == this.state.Me){
-                this.state.P1chips -= this.state.cur_bet;
-                this.update_P1chips();
-                this.state.pot += this.state.cur_bet;
-                this.update_pot();
-            } else {
-                this.state.P2chips -= this.state.cur_bet;
-                this.update_P2chips();
-                this.state.pot += this.state.cur_bet;
-                this.update_pot();
-            }
             //show river
             this.updateRiver()
             //update where_in game
@@ -199,6 +186,15 @@ class GamePage extends React.Component {
         this.update_num_checks();
         //update turn;
         this.update_turn();
+        this.state.cur_bet = 0;
+        fire.database().ref("/Root/GameID/").update({
+            cur_bet: 0
+        })
+        if (this.state.cur_bet == 0){
+            document.getElementById('bet amount').style.visibility='hidden';
+        } else {
+            document.getElementById('bet amount').style.visibility='visible';
+        }
     }
 
     check(){
@@ -244,6 +240,15 @@ class GamePage extends React.Component {
         } else {
             this.state.P2chips += this.state.pot;
             this.update_P2chips();
+        }
+        this.state.cur_bet = 0;
+        fire.database().ref("/Root/GameID/").update({
+            cur_bet: 0
+        })
+        if (this.state.cur_bet == 0){
+            document.getElementById('bet amount').style.visibility='hidden';
+        } else {
+            document.getElementById('bet amount').style.visibility='visible';
         }
         fire.database().ref("/Root/GameID/").once('value', snapshot => {
             /* Set State Variables */
@@ -685,6 +690,14 @@ begin_hand(){
     //show back of all cards at the begginning of the hand
     this.resetBoard();
     this.dealPlayers();
+    fire.database().ref("/Root/GameID/").update({
+        cur_bet: 0
+    })
+    if (this.state.cur_bet == 0){
+        document.getElementById('bet amount').style.visibility='hidden';
+    } else {
+        document.getElementById('bet amount').style.visibility='visible';
+    }
     this.state.Ca1 = "back";
     this.state.Ca2 = "back";
     this.state.Ca3 = "back";
@@ -780,6 +793,7 @@ begin_hand(){
                 </div>
  
                 <div style={{display: 'flex', justifyContent: 'center', height: "100%", margin: '50px'}}>
+                    <h1 id = "bet amount" style={{textAlign: "center", margin: '30px'}}>Amount to Call<br/> {this.state.cur_bet}</h1>
                     <h1 style={{textAlign: "center", margin: '30px', marginLeft: '300px'}}>
                         My Stack<br/> {this.state.P1chips} </h1>
                     { this.get_card_img(this.state.P1C1) }
