@@ -99,8 +99,12 @@ class GamePage extends React.Component {
         })
         if (this.state.cur_bet == 0){
             document.getElementById('bet amount').style.visibility='hidden';
+            document.getElementById('Fold').style.visibility='hidden';
+            document.getElementById('Raise').style.visibility='hidden';
         } else {
             document.getElementById('bet amount').style.visibility='visible';
+            document.getElementById('Fold').style.visibility='visible';
+            document.getElementById('Raise').style.visibility='visible';
         }
         //adjust chips and pot size
         if (this.state.currTurn == this.state.Me){
@@ -127,8 +131,12 @@ class GamePage extends React.Component {
         })
         if (this.state.cur_bet == 0){
             document.getElementById('bet amount').style.visibility='hidden';
+            document.getElementById('Fold').style.visibility='hidden';
+            document.getElementById('Raise').style.visibility='hidden';
         } else {
             document.getElementById('bet amount').style.visibility='visible';
+            document.getElementById('Fold').style.visibility='visible';
+            document.getElementById('Raise').style.visibility='visible';
         }
         if (this.state.currTurn == this.state.Me){
             this.state.P1chips -= amount;
@@ -192,8 +200,12 @@ class GamePage extends React.Component {
         })
         if (this.state.cur_bet == 0){
             document.getElementById('bet amount').style.visibility='hidden';
+            document.getElementById('Fold').style.visibility='hidden';
+            document.getElementById('Raise').style.visibility='hidden';
         } else {
             document.getElementById('bet amount').style.visibility='visible';
+            document.getElementById('Fold').style.visibility='visible';
+            document.getElementById('Raise').style.visibility='visible';
         }
     }
 
@@ -247,8 +259,12 @@ class GamePage extends React.Component {
         })
         if (this.state.cur_bet == 0){
             document.getElementById('bet amount').style.visibility='hidden';
+            document.getElementById('Fold').style.visibility='hidden';
+            document.getElementById('Raise').style.visibility='hidden';
         } else {
             document.getElementById('bet amount').style.visibility='visible';
+            document.getElementById('Fold').style.visibility='visible';
+            document.getElementById('Raise').style.visibility='visible';
         }
         fire.database().ref("/Root/GameID/").once('value', snapshot => {
             /* Set State Variables */
@@ -695,8 +711,12 @@ begin_hand(){
     })
     if (this.state.cur_bet == 0){
         document.getElementById('bet amount').style.visibility='hidden';
+        document.getElementById('Fold').style.visibility='hidden';
+        document.getElementById('Raise').style.visibility='hidden';
     } else {
         document.getElementById('bet amount').style.visibility='visible';
+        document.getElementById('Fold').style.visibility='visible';
+        document.getElementById('Raise').style.visibility='visible';
     }
     this.state.Ca1 = "back";
     this.state.Ca2 = "back";
