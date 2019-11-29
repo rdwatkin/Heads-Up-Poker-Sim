@@ -22,17 +22,16 @@ const images = require.context('./images', true);
 
 class GamePage extends React.Component {
 
-
     /* Bind Functions to Namespace */
     constructor() {
         super()
         this.get_card_img = this.get_card_img.bind(this);
         this.state = {Ca1: "", Ca2: "", Ca3: "", Ca4: "", Ca5: "",
                       P1C1: "", P1C2: "", P2C1: "", P2C2: "", P1chips: "",
-                      P2chips: "", pot: "", currTurn: "" }
+                      P2chips: "", pot: "", currTurn: "", P1: "", P2: "", Me: "",
+                      num_call: "", num_checks: "", where_in_game: "", P1email: "", 
+                      P2email: "", Turn_Email: "", smallblind: "", cur_bet: ""}
     }
-
-    
 
     componentWillMount(){
         this.upload_turn();
@@ -46,9 +45,17 @@ class GamePage extends React.Component {
             var Car5 = snapshot.child("C5").val()
             var P1Ca1 = snapshot.child(currUser).child("C1").val()
             var P1Ca2 = snapshot.child(currUser).child("C2").val()
+            var Player1 = snapshot.child("Player1").val();
+            var Player2 = snapshot.child("Player2").val();
             var Fturn = snapshot.child("turn").child("currTurn").val()
-            //var Player1chips = 100;
-            //var Player2chips = 100;
+            var PoneEmail = snapshot.child("Player1_Email").child("email").val()
+            var PtwoEmail = snapshot.child("Player2_Email").child("email").val()
+            var whoAmI = "";
+            if (currUser == Player1){
+                whoAmI = "Player1"
+            }else{
+                whoAmI = "Player2"
+            }
             /* Set State Variables */
             this.setState({
                 Ca1: Car1,
@@ -58,12 +65,262 @@ class GamePage extends React.Component {
                 Ca5: Car5,
                 P1C1: P1Ca1,
                 P1C2: P1Ca2,
+                P1: Player1,
+                P2: Player2,
                 P1chips: 1000,
                 P2chips: 1000,
                 pot: 0,
-                currTurn: Fturn
-            })
+                currTurn: Fturn,
+                Me: whoAmI,
+                num_checks: 0,
+                num_call: 0,
+                P1email: PoneEmail,
+                P2email: PtwoEmail,
+                Turn_Email: PoneEmail,
+                smallblind: "Begin",
+                cards_dealt: this.deal_nine_cards(),
+                where_in_game: "start",
+                cur_bet: 0
+            }, this.begin_hand )
         })
+    }
+
+
+
+//------------------------------------Button Actions Below ---------------------------------------
+
+    //for now, going to make it bet 50 by default
+    bet(){
+        var amount = document.getElementById("Bet_amount").value;
+        amount = parseInt(amount);
+        this.state.cur_bet = amount;
+        fire.database().ref("/Root/GameID/").update({
+            cur_bet: amount
+        })
+        if (this.state.cur_bet == 0){
+            document.getElementById('bet amount').style.visibility='hidden';
+            document.getElementById('Fold').style.visibility='hidden';
+            document.getElementById('Raise').style.visibility='hidden';
+        } else {
+            document.getElementById('bet amount').style.visibility='visible';
+            document.getElementById('Fold').style.visibility='visible';
+            document.getElementById('Raise').style.visibility='visible';
+        }
+        //adjust chips and pot size
+        if (this.state.currTurn == this.state.Me){
+            this.state.P1chips -= amount;
+            this.update_P1chips();
+            this.state.pot += amount;
+            this.update_pot();
+        } else {
+            this.state.P2chips -= amount;
+            this.update_P2chips();
+            this.state.pot += amount;
+            this.update_pot();
+        }
+        //adjust turn
+        this.update_turn();
+    }
+
+    //need to edit
+    raise(){
+        var amount = document.getElementById("Raise_amount").value;
+        amount = parseInt(amount);
+        fire.database().ref("/Root/GameID/").update({
+            cur_bet: amount - this.state.cur_bet
+        })
+        if (this.state.cur_bet == 0){
+            document.getElementById('bet amount').style.visibility='hidden';
+            document.getElementById('Fold').style.visibility='hidden';
+            document.getElementById('Raise').style.visibility='hidden';
+        } else {
+            document.getElementById('bet amount').style.visibility='visible';
+            document.getElementById('Fold').style.visibility='visible';
+            document.getElementById('Raise').style.visibility='visible';
+        }
+        if (this.state.currTurn == this.state.Me){
+            this.state.P1chips -= amount;
+            this.update_P1chips();
+            this.state.pot += amount;
+            this.update_pot();
+        } else {
+            this.state.P2chips -= amount;
+            this.update_P2chips();
+            this.state.pot += amount
+            this.update_pot();
+        }
+        this.update_turn();
+    }
+
+    call(){
+        //put chips in pot
+        if (this.state.currTurn == this.state.Me){
+            this.state.P1chips -= this.state.cur_bet;
+            this.update_P1chips();
+            this.state.pot += this.state.cur_bet;
+            this.update_pot();
+        } else {
+            this.state.P2chips -= this.state.cur_bet;
+            this.update_P2chips();
+            this.state.pot += this.state.cur_bet;
+            this.update_pot();
+        }
+        if(this.state.where_in_game == "start"){
+            //show flop
+            this.updateFlop()
+            //update where_in game
+            this.state.where_in_game = "flop";
+            this.update_where_in_game();
+        } else if(this.state.where_in_game == "flop"){
+            //show turn
+            this.updateTurn()
+            //update where_in game
+            this.state.where_in_game = "turn";
+            this.update_where_in_game();
+        } else if (this.state.where_in_game == "turn"){
+            //show river
+            this.updateRiver()
+            //update where_in game
+            this.state.where_in_game = "river";
+            this.update_where_in_game();
+        } else if (this.state.where_in_game == "river"){
+            //compare hands
+
+
+
+        }
+        //reset num_checks
+        this.state.num_checks = 0;
+        this.update_num_checks();
+        //update turn;
+        this.update_turn();
+        this.state.cur_bet = 0;
+        fire.database().ref("/Root/GameID/").update({
+            cur_bet: 0
+        })
+        if (this.state.cur_bet == 0){
+            document.getElementById('bet amount').style.visibility='hidden';
+            document.getElementById('Fold').style.visibility='hidden';
+            document.getElementById('Raise').style.visibility='hidden';
+        } else {
+            document.getElementById('bet amount').style.visibility='visible';
+            document.getElementById('Fold').style.visibility='visible';
+            document.getElementById('Raise').style.visibility='visible';
+        }
+    }
+
+    check(){
+        this.state.num_checks ++;
+        this.update_num_checks();
+        if (this.state.num_checks == 2){
+            if (this.state.where_in_game == "start"){
+                //show flop
+                this.updateFlop();
+                //update where_in game
+                this.state.where_in_game = "flop";
+                this.update_where_in_game();
+            } else if (this.state.where_in_game == "flop"){
+                //show turn
+                this.updateTurn();
+                //update where_in game
+                this.state.where_in_game = "turn";
+                this.update_where_in_game();
+            } else if (this.state.where_in_game == "turn"){
+                //show river
+                this.updateRiver()
+                //update where_in game
+                this.state.where_in_game = "river";
+                this.update_where_in_game();
+            } else if (this.state.where_in_game == "river"){
+                //compare hands
+
+
+
+            }
+            //reset num_checks
+            this.state.num_checks = 0;
+            this.update_num_checks();
+        }
+        this.update_turn();
+    }
+
+    fold(){
+        //give pot to other player
+        if (this.state.currTurn == this.state.Me){
+            this.state.P1chips += this.state.pot;
+            this.update_P1chips();
+        } else {
+            this.state.P2chips += this.state.pot;
+            this.update_P2chips();
+        }
+        this.state.cur_bet = 0;
+        fire.database().ref("/Root/GameID/").update({
+            cur_bet: 0
+        })
+        if (this.state.cur_bet == 0){
+            document.getElementById('bet amount').style.visibility='hidden';
+            document.getElementById('Fold').style.visibility='hidden';
+            document.getElementById('Raise').style.visibility='hidden';
+        } else {
+            document.getElementById('bet amount').style.visibility='visible';
+            document.getElementById('Fold').style.visibility='visible';
+            document.getElementById('Raise').style.visibility='visible';
+        }
+        fire.database().ref("/Root/GameID/").once('value', snapshot => {
+            /* Set State Variables */
+            this.setState({
+                cards_dealt: this.deal_nine_cards(),
+                where_in_game: "start"
+            }, this.begin_hand )
+        })
+    }
+
+//------------------------------------Button Actions Above ---------------------------------------
+
+
+
+//------------------------------------Data Base Control Below ---------------------------------------
+
+    update_where_in_game(){
+        fire.database().ref("/Root/GameID/where_in_game").update({
+           where_in_game: this.state.where_in_game
+        })
+        fire.database().ref()
+    }
+
+    update_num_checks(){
+        fire.database().ref("/Root/GameID/num_checks").update({
+            num_checks: this.state.num_checks
+        })
+        fire.database().ref()
+    }
+
+    update_num_call(){
+        fire.database().ref("/Root/GameID/num_call").update({
+            num_call: this.state.num_call
+        })
+        fire.database().ref()
+    }
+
+    update_pot(){
+        fire.database().ref("/Root/GameID/").update({
+            pot: this.state.pot
+        })
+        fire.database().ref()
+    }
+
+    update_P1chips(){
+        fire.database().ref("/Root/GameID/").update({
+            P1chips: this.state.P1chips
+        })
+        fire.database().ref()
+    }
+
+    update_P2chips(){
+        fire.database().ref("/Root/GameID/").update({
+            P2chips: this.state.P2chips
+        })
+        fire.database().ref()
     }
 
     upload_turn(){
@@ -76,6 +333,8 @@ class GamePage extends React.Component {
 
     update_turn(){
         var turn = this.state.currTurn;
+        var P1 = this.state.P1email;
+        var P2 = this.state.P2email;
         if(turn == "Player 1"){
             var newTurn = "Player 2";
             fire.database().ref("/Root/GameID/turn").update({
@@ -83,7 +342,8 @@ class GamePage extends React.Component {
             })
             fire.database().ref()
             this.setState({
-                currTurn: newTurn
+                currTurn: newTurn,
+                Turn_Email: P2
             })
         }
         else{
@@ -93,9 +353,27 @@ class GamePage extends React.Component {
             })
             fire.database().ref()
             this.setState({
-                currTurn: newTurn
+                currTurn: newTurn,
+                Turn_Email: P1
             })
         }
+        /*
+        //hide buttons when not your turn
+        if (this.state.Me != this.state.currTurn){
+            document.getElementById('Check').style.visibility='hidden';
+            document.getElementById('Bet').style.visibility='hidden';
+            document.getElementById('Call').style.visibility='hidden';
+            document.getElementById('Raise').style.visibility='hidden';
+            document.getElementById('Fold').style.visibility='hidden';
+        //show buttons when your turn
+        } else {
+            document.getElementById('Check').style.visibility='visible';
+            document.getElementById('Bet').style.visibility='visible';
+            document.getElementById('Call').style.visibility='visible';
+            document.getElementById('Raise').style.visibility='visible';
+            document.getElementById('Fold').style.visibility='visible';
+        }
+        */
     }
 
     upload_value_to_database(path, name, value){
@@ -110,6 +388,202 @@ class GamePage extends React.Component {
         fire.auth().signOut();
     }
 
+    resetBoard(){
+        fire.database().ref("/Root/GameID/").update({
+            Player1: this.state.P1,
+            Player2: this.state.P2,
+            C1: "back",
+            C2: "back",
+            C3: "back",
+            C4: "back",
+            C5: "back"
+        })
+        fire.database().ref("/Root/GameID/"+this.state.P1).set({
+            C1: "back",
+            C2: "back"
+        });
+        fire.database().ref("/Root/GameID/"+this.state.P2).set({
+            C1: "back",
+            C2: "back"
+        });
+    }
+
+    dealPlayers(){
+        fire.database().ref("/Root/GameID/" + this.state.P1).update({
+            C1: this.state.cards_dealt[5],
+            C2: this.state.cards_dealt[6]
+    })
+        fire.database().ref("/Root/GameID/" + this.state.P2).update({
+            C1: this.state.cards_dealt[7],
+            C2: this.state.cards_dealt[8]
+    })
+    }
+
+    updateFlop(){
+        //set current turn to small blind
+        var P1 = this.state.P1email;
+        var P2 = this.state.P2email;
+        var SB = this.state.smallblind;
+        if(SB == "P2"){
+            var newTurn = "Player 2";
+            fire.database().ref("/Root/GameID/turn").update({
+                currTurn: newTurn
+            })
+            fire.database().ref()
+            this.setState({
+                currTurn: newTurn,
+                Turn_Email: P2
+            })
+        }
+        else{
+            var newTurn = "Player 1";
+            fire.database().ref("/Root/GameID/turn").update({
+                currTurn: newTurn
+            })
+            fire.database().ref()
+            this.setState({
+                currTurn: newTurn,
+                Turn_Email: P1
+            })
+        }
+        fire.database().ref("/Root/GameID/").update({
+                C1: this.state.cards_dealt[0],
+                C2: this.state.cards_dealt[1],
+                C3: this.state.cards_dealt[2],
+                C4: "back",
+                C5: "back",
+                pot: this.state.pot,
+                P1chips: this.state.P1chips,
+                P2chips: this.state.P2chips
+        })
+        fire.database().ref("/Root/GameID/" + this.state.P1).set({
+            C1: this.state.cards_dealt[5],
+            C2: this.state.cards_dealt[6]
+         })
+        fire.database().ref("/Root/GameID/" + this.state.P2).set({
+            C1: this.state.cards_dealt[7],
+            C2: this.state.cards_dealt[8]
+         })
+    }
+
+    updateTurn(){
+        //set current turn to small blind
+        var P1 = this.state.P1email;
+        var P2 = this.state.P2email;
+        var SB = this.state.smallblind;
+        if(SB == "P2"){
+            var newTurn = "Player 2";
+            fire.database().ref("/Root/GameID/turn").update({
+                currTurn: newTurn
+            })
+            fire.database().ref()
+            this.setState({
+                currTurn: newTurn,
+                Turn_Email: P2
+            })
+        }
+        else{
+            var newTurn = "Player 1";
+            fire.database().ref("/Root/GameID/turn").update({
+                currTurn: newTurn
+            })
+            fire.database().ref()
+            this.setState({
+                currTurn: newTurn,
+                Turn_Email: P1
+            })
+        }
+        fire.database().ref("/Root/GameID/").update({
+            C1: this.state.cards_dealt[0],
+            C2: this.state.cards_dealt[1],
+            C3: this.state.cards_dealt[2],
+            C4: this.state.cards_dealt[3],
+            C5: "back",
+            pot: this.state.pot,
+            P1chips: this.state.P1chips,
+            P2chips: this.state.P2chips
+        })
+        fire.database().ref("/Root/GameID/" + this.state.P1).set({
+            C1: this.state.cards_dealt[5],
+            C2: this.state.cards_dealt[6]
+         })
+        fire.database().ref("/Root/GameID/" + this.state.P2).set({
+            C1: this.state.cards_dealt[7],
+            C2: this.state.cards_dealt[8]
+        })
+    }
+
+    updateRiver(){
+        //set current turn to small blind
+        var P1 = this.state.P1email;
+        var P2 = this.state.P2email;
+        var SB = this.state.smallblind;
+        if(SB == "P2"){
+            var newTurn = "Player 2";
+            fire.database().ref("/Root/GameID/turn").update({
+                currTurn: newTurn
+            })
+            fire.database().ref()
+            this.setState({
+                currTurn: newTurn,
+                Turn_Email: P2
+            })
+        }
+        else{
+            var newTurn = "Player 1";
+            fire.database().ref("/Root/GameID/turn").update({
+                currTurn: newTurn
+            })
+            fire.database().ref()
+            this.setState({
+                currTurn: newTurn,
+                Turn_Email: P1
+            })
+        }
+        fire.database().ref("/Root/GameID/").update({
+            C1: this.state.cards_dealt[0],
+            C2: this.state.cards_dealt[1],
+            C3: this.state.cards_dealt[2],
+            C4: this.state.cards_dealt[3],
+            C5: this.state.cards_dealt[4],
+            pot: this.state.pot,
+            P1chips: this.state.P1chips,
+            P2chips: this.state.P2chips
+        })
+        fire.database().ref("/Root/GameID/" + this.state.P1).set({
+            C1: this.state.cards_dealt[5],
+            C2: this.state.cards_dealt[6]
+         })
+        fire.database().ref("/Root/GameID/" + this.state.P2).set({
+            C1: this.state.cards_dealt[7],
+            C2: this.state.cards_dealt[8]
+        })
+    }
+
+    remove_card(deck, index){
+        for(var i = index; i <= 52; i++ ){
+            deck[i] = deck[i+1];
+        }
+    }
+
+    deal_nine_cards(){
+        var cards_left = 52;
+        var dealt_cards = new Array(10);
+        var deck = ["1S", "2S", "3S", "4S", "5S", "6S", "7S", "8S", "9S", "10S", "JS", "QS", "KS",
+                    "1H", "2H", "3H", "4H", "5H", "6H", "7H", "8H", "9H", "10H", "JH", "QH", "KH",
+                    "1D", "2D", "3D", "4D", "5D", "6D", "7D", "8D", "9D", "10D", "JD", "QD", "KD",
+                    "1C", "2C", "3C", "4C", "5C", "6C", "7C", "8C", "9C", "10C", "JC", "QC", "KC"];
+        var card;
+        var index;
+        for(var i=0; i<9; i++){
+            index = Math.floor(Math.random()*cards_left);
+            dealt_cards[i] = deck[index];
+            this.remove_card(deck, index);
+            cards_left--;
+        }
+        return dealt_cards;
+    }
+
     get_card_img(card){
         if (card == ""){
             card = "back";
@@ -118,8 +592,11 @@ class GamePage extends React.Component {
         return <img src={imgsrc} style={{height: "10em", marginRight: '10px'}}/>;
     }
 
+//------------------------------------Data Base Control Above ---------------------------------------
 
 
+
+//------------------------------------Hand Comparisons Below ---------------------------------------
 
     get_value(card){
         var val = card.slice(0, card.length);
@@ -162,7 +639,6 @@ class GamePage extends React.Component {
             return false;
         }
     }
-
 
     full_house_check(current_cards){
         var reverse_sorted_hand = current_cards.sort(function(a, b) {return b-a;}); //Reverse sort to find the highest triple/pair first
@@ -212,7 +688,6 @@ class GamePage extends React.Component {
                 this.temp = this.get_value(reverse_sorted_hand[i]);
                 double_count = 1;
             }
-
         }
         if(pair_check = false){
             return [0,0]
@@ -273,115 +748,107 @@ class GamePage extends React.Component {
             return 0;
         }
         return double_value;
-
     } 
-
-    //main, control action of the game: whos turn, pot size/winner, flips cards when needed
-    game_control() {
-        //initialize variables
-        var gameover = false;
-        var action_complete = false;
-        var pot = 0;
-        //var P1chips = 1000;
-        //var P2chips = 1000;
-        var smallblind = "start";
-        var bigblind = "temp";
-        //while niether player has 0 chips
-        while (gameover == false) {
-            //switch blinds
-            if (smallblind == "P1"){
-                smallblind = "P2";
-            } else {
-                smallblind = "P1";
-            }
-            //remove blinds from players: 25 for small blind, 50 for big blind
-            if (smallblind == "P1"){
-                this.state.P1chips -= 25;
-                this.state.P2chips -= 50;
-                //update on display
-                
-            } else {
-                this.state.P1chips -= 50;
-                this.state.P2chips -= 25;
-                //update on display
-
-            }
-            //add blinds to the pot
-            this.state.pot = 75;
-            //update on display
-
-            //show each player their cards, while having opponets flipped
-
-//Pre Flop            
-            while(action_complete == false){
-                //Allow small blind to have action
-            
-
-                //Give Big blind action
-                
-            }
-            //reset action_complete
-            action_complete = false;
+//------------------------------------Hand Comparisons Above ---------------------------------------
 
 
-            //When action is complete, show flop to both players
 
+//------------------------------------Begin Hand and HTML Below ---------------------------------------
 
-//Flop            
-            while(action_complete == false){
-                //Allow small blind to have action
-            
-                //Give Big blind action
-                
-            }
-            //reset action_complete
-            action_complete = false;
-            //when action is complete, show turn to both players
-
-//Turn
-            while(action_complete == false){
-                //Allow small blind to have action
-            
-
-                //Give Big blind action
-                
-            }
-            //reset action_complete
-            action_complete = false;
-            //when action is complete, show river to both players
-
-            
-
-//River
-            while(action_complete == false){
-                //Allow small blind to have action
-            
-
-                //Give Big blind action
-                
-            }
-            //reset action_complete
-            action_complete = false;
-            //When action is complete, show both players cards, and award pot to winner. Reset
-
-
-            //call function to determine winner
-
-
-            //Determine if game is over
-            if (this.state.P1chips == 0 || this.state.P2chips == 0){
-                gameover = true;
-            }
-        }
-        //game is over
-
+begin_hand(){
+    var smallblind = this.state.smallblind;
+    //show back of all cards at the begginning of the hand
+    this.resetBoard();
+    this.dealPlayers();
+    fire.database().ref("/Root/GameID/").update({
+        cur_bet: 0
+    })
+    if (this.state.cur_bet == 0){
+        document.getElementById('bet amount').style.visibility='hidden';
+        document.getElementById('Fold').style.visibility='hidden';
+        document.getElementById('Raise').style.visibility='hidden';
+    } else {
+        document.getElementById('bet amount').style.visibility='visible';
+        document.getElementById('Fold').style.visibility='visible';
+        document.getElementById('Raise').style.visibility='visible';
     }
+    this.state.Ca1 = "back";
+    this.state.Ca2 = "back";
+    this.state.Ca3 = "back";
+    this.state.Ca4 = "back";
+    this.state.Ca5 = "back";
+    this.state.where_in_game = "start";
+    this.update_where_in_game();
+    this.state.num_checks = 0;
+    this.update_num_checks();
+    this.state.num_call = 0;
+    this.update_num_call();
+    //switch blinds
+    if (smallblind == "P1"){
+        smallblind = "P2";
+    } else {
+       smallblind = "P1";
+    }
+    //remove blinds from players: 25 for small blind, 50 for big blind
+    if (smallblind == "P1"){
+        //update on display
+        this.state.P1chips -= 25;
+        this.update_P1chips();
+        this.state.P2chips -= 50;
+        this.update_P2chips();
+    } else {
+        //update on display
+        this.state.P1chips -= 50;
+        this.update_P1chips();
+        this.state.P2chips -= 25;
+        this.update_P2chips();
+    }
+    //add blinds to the pot
+    this.state.pot = 75;
+    this.update_pot();
+    //update values from firebase
+    fire.database().ref("/Root/GameID/").on('value', snapshot => {
+        var currUser = fire.auth().currentUser.uid;
+        var P2Chips = snapshot.child("P2chips").val()
+        var P1Chips = snapshot.child("P1chips").val()
+        var current_bet = snapshot.child("cur_bet").val()
+        var where = snapshot.child("where_in_game").child("where_in_game").val()
+        var sPOT = snapshot.child("pot").val()
+        var ncall = snapshot.child("num_call").child("num_call").val()
+        var nchecks = snapshot.child("num_checks").child("num_checks").val()
+        var Nturn = snapshot.child("turn").child("currTurn").val()
+        var Car1 = snapshot.child("C1").val()
+        var Car2 = snapshot.child("C2").val()
+        var Car3 = snapshot.child("C3").val()
+        var Car4 = snapshot.child("C4").val()
+        var Car5 = snapshot.child("C5").val()
+        var P1Ca1 = snapshot.child(currUser).child("C1").val()
+        var P1Ca2 = snapshot.child(currUser).child("C2").val()
+            this.setState({
+                Ca1: Car1,
+                Ca2: Car2,
+                Ca3: Car3,
+                Ca4: Car4,
+                Ca5: Car5,
+                P1C1: P1Ca1,
+                P1C2: P1Ca2,
+                P2chips: P2Chips,
+                P1chips: P1Chips,
+                where_in_game: where,
+                pot: sPOT,
+                num_call: ncall,
+                num_checks: nchecks,
+                currTurn: Nturn,
+                cur_bet: current_bet
+            })
+    })    
+}
 
     render() {
         return (
             <div>
                 <div style={{display: 'flex', justifyContent: 'center', height: "50%", margin: '50px'}}>
-                    <h1><u>It is {this.state.currTurn}'s turn</u></h1>
+                    <h1><u>It is {this.state.Turn_Email}'s turn</u></h1>
                 </div>
                 <div style={{display: 'flex', justifyContent: 'center', height: "50%", margin: '50px'}}>
                     <h1 style={{textAlign: "center", margin: '30px', marginLeft: '210px'}}>
@@ -400,23 +867,26 @@ class GamePage extends React.Component {
                 </div>
  
                 <div style={{display: 'flex', justifyContent: 'center', height: "100%", margin: '50px'}}>
+                    <h1 id = "bet amount" style={{textAlign: "center", margin: '30px'}}>Amount to Call<br/> {this.state.cur_bet}</h1>
                     <h1 style={{textAlign: "center", margin: '30px', marginLeft: '300px'}}>
                         My Stack<br/> {this.state.P1chips} </h1>
                     { this.get_card_img(this.state.P1C1) }
                     { this.get_card_img(this.state.P1C2) }
  
                     <div style={{display: 'flex', justifyContent: 'center', height: "100%", flexDirection: 'column'}}>
-                        <button style={{margin: '7px', marginTop: '15px'}} onClick={() => {this.update_turn()}}>CHECK</button>
-                        <button style={{margin: '7px'}} onClick={() => {this.update_turn()}}>BET</button>
-                        <button style={{margin: '7px'}} onClick={() => {this.update_turn()}}>RAISE</button>
-                        <button style={{margin: '7px'}} onClick={() => {this.update_turn()}}>CALL</button>
-                        <button style={{margin: '7px'}} onClick={() => {this.update_turn()}}>FOLD</button>
+                        <button id ="Check" style={{margin: '7px', marginTop: '15px'}} onClick={() => {this.check()}}>CHECK</button>
+                        <button id ="Bet" style={{margin: '7px'}} onClick={() => {this.bet()}}>BET</button>
+                        <button id = "Raise" style={{margin: '7px'}} onClick={() => {this.raise()}}>RAISE</button>
+                        <button id = "Call" style={{margin: '7px'}} onClick={() => {this.call()}}>CALL</button>
+                        <button id = "Fold" style={{margin: '7px'}} onClick={() => {this.fold()}}>FOLD</button>
+                    </div>
+                    <div style={{display: 'flex', justifyContent: 'center', height: "100%", flexDirection: 'column'}}>
+                        <input id="Bet_amount" style={{margin: '7px', marginTop: '50px'}} max={this.state.P1chips} min="25" type="number"/>
+                        <input id="Raise_amount" style={{margin: '7px'}} min="25" max={this.state.P1chips}  type="number"/>
                     </div>
                 </div>
-   
             </div>
         )
     }
 }
- 
 export default GamePage;
