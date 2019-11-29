@@ -185,9 +185,27 @@ class GamePage extends React.Component {
             this.update_where_in_game();
         } else if (this.state.where_in_game == "river"){
             //compare hands
-
-
-
+            var winner = "temp";
+            //kenneth, can you call your function to determine a winner and have it return Player 1 or 2
+            //winner = kenneth_function()
+            
+            //give winner chips
+            if (winner == this.state.Player1){
+                this.state.P1chips += this.state.pot;
+                this.update_P1chips();
+            } else {
+                this.state.P2chips += this.state.pot;
+                this.update_P2chips();
+            }
+            this.state.pot = 0;
+            this.update_pot();
+            fire.database().ref("/Root/GameID/").once('value', snapshot => {
+                /* Set State Variables */
+                this.setState({
+                    cards_dealt: this.deal_nine_cards(),
+                    where_in_game: "start"
+                }, this.begin_hand )
+            })
         }
         //reset num_checks
         this.state.num_checks = 0;
@@ -233,9 +251,27 @@ class GamePage extends React.Component {
                 this.update_where_in_game();
             } else if (this.state.where_in_game == "river"){
                 //compare hands
-
-
-
+                var winner = "temp";
+                //kenneth, can you call your function to determine a winner and have it return Player 1 or 2
+                //winner = kenneth_function()
+            
+                //give winner chips
+                if (winner == this.state.Player1){
+                    this.state.P1chips += this.state.pot;
+                    this.update_P1chips();
+                } else {
+                    this.state.P2chips += this.state.pot;
+                    this.update_P2chips();
+                }
+                this.state.pot = 0;
+                this.update_pot();
+                fire.database().ref("/Root/GameID/").once('value', snapshot => {
+                    /* Set State Variables */
+                    this.setState({
+                        cards_dealt: this.deal_nine_cards(),
+                        where_in_game: "start"
+                    }, this.begin_hand )
+                })
             }
             //reset num_checks
             this.state.num_checks = 0;
