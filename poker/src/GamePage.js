@@ -653,9 +653,40 @@ class GamePage extends React.Component {
 
     hand_check(card1, card2){
         var hand = [this.state.Ca1, this.state.Ca2, this.state.Ca3, this.state.Ca4, this.state.Ca5, card1, card2];
-        if(this.royal_flush_check(hand)){
-            return "royal flush";
+        var return_array = this.royal_flush_check(hand);
+        if(return_array[0] == 9){
+            return return_array;
         }
+        return_array = this.straight_flush_check(hand);
+        if(return_array[0] == 8){
+            return return_array;
+        }
+        return_array = this.full_house_check(hand);
+        if(return_array[0] == 6){
+            return return_array;
+        }
+        return_array = this.flush_check(hand);
+        if(return_array[0] == 5){
+            return return_array;
+        }
+        return_array = this.straight_check(hand);
+        if(return_array[0] == 4){
+            return return_array;
+        }
+        return_array = this.triple_check(hand);
+        if(return_array[0] == 3){
+            return return_array;
+        }
+        return_array = this.double_pair_check(hand);
+        if(return_array[0] == 2){
+            return return_array;
+        }
+        return_array = this.pair_check(hand);
+        if(return_array[0] == 1){
+            return return_array;
+        }
+        return [0];
+
     }
 
     royal_flush_check(current_cards){
