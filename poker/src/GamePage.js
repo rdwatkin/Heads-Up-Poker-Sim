@@ -685,6 +685,61 @@ class GamePage extends React.Component {
         }
     }
 
+    straight_flush_check(current_cards){
+        var sorted_hand_values_temp;
+        var sorted_hand_suits_temp;
+        for(var i = 0; i < 7; i++){
+            sorted_hand_values_temp[i] = this.get_value(current_cards[i]);
+        }
+        for(var i = 0; i < 7; i++){
+            sorted_hand_suits_temp[i] = this.get_suit(current_cards[i]);
+        }
+        var sorted_hand_values = sorted_hand_values_temp.sort(function(a, b) {return b-a;});
+        var sorted_hand_suits = sorted_hand_suits.sort(function(a, b) {return b-a;});
+        var straight_count = 1;
+        var highest_card_value = sorted_hand_values[0];
+        var highest_card_suit = sorted_hand_suits[0];
+        var temp = highest_card_value;
+        for(var i = 0; i < 7; i++){
+            if(i != 6){
+                if((sorted_hand_values[i+1] == temp - 1) && (sorted_hand_suits[i+1] == highest_card_suit)){
+                    straight_count++; 
+                    temp--;
+                } 
+                else{
+                    straight_count = 1;
+                    highest_card_value = sorted_hand_values[i+1];
+                    highest_card_suit = sorted_hand_suits[i+1];
+                    temp = highest_card_value;
+                }
+            }
+        }
+        if(straight_count >= 5){
+            return [4, highest_card_value];
+        }
+        if(sorted_hand_values[0] == 14){
+            highest_card_value = 5;
+            highest_card_suit = sorted_hand_suits[0];
+            temp = highest_card_value;
+            straight_count = 1;
+            for(var i = 3; i < 7; i++){
+                if(i != 6){
+                    if((sorted_hand_values[i+1] == temp - 1) && (highest_card_suit == sorted_hand_suits[i+1])){
+                        straight_count++; 
+                        temp--;
+                    } 
+                    else{
+                        break;
+                    }
+
+                }
+            }
+        }
+        if(straight_count == 4){
+            return [4, 5];
+        }
+    }
+
     full_house_check(current_cards){
         var sorted_hand_values_temp;
         for(var i = 0; i < 7; i++){
@@ -795,16 +850,19 @@ class GamePage extends React.Component {
             sorted_hand_values_temp[i] = this.get_value(current_cards[i]);
         }
         var reverse_sorted_hand = sorted_hand_values_temp.sort(function(a, b) {return b-a;});
-        var straight_count = 0;
+        var straight_count = 1;
         var highest_card = reverse_sorted_hand[0];
+        var temp = highest_card;
         for(var i = 0; i < 7; i++){
             if(i != 6){
-                if(reverse_sorted_hand[i+1] == highest_card - 1){
+                if(reverse_sorted_hand[i+1] == temp - 1){
                     straight_count++; 
+                    temp--;
                 } 
                 else{
-                    straight_count = 0;
+                    straight_count = 1;
                     highest_card = reverse_sorted_hand[i+1];
+                    temp = highest_card;
                 }
             }
         }
@@ -813,14 +871,17 @@ class GamePage extends React.Component {
         }
         if(reverse_sorted_hand[0] == 14){
             highest_card = 5;
+            temp = 5;
+            straight_count = 1;
             for(var i = 3; i < 7; i++){
                 if(i != 6){
-                    if(reverse_sorted_hand[i+1] == highest_card - 1){
+                    if(reverse_sorted_hand[i+1] == temp - 1){
                         straight_count++; 
                     } 
                     else{
-                        straight_count = 0;
+                        straight_count = 1;
                         highest_card = reverse_sorted_hand[i+1];
+                        temp = highest_card;
                     }
 
                 }
