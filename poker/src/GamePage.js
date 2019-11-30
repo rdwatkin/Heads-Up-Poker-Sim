@@ -700,16 +700,16 @@ class GamePage extends React.Component {
         var temp = 0;
         //Check for the highest triple
         for(var i = 0; i < 7; i++){
-            if(temp == this.get_value(reverse_sorted_hand[i])){
+            if(temp == reverse_sorted_hand[i]){
                 triple_count++;
                 if(triple_count == 3){
                     triple_check = true;
-                    triple_value = this.get_value(reverse_sorted_hand[i])
+                    triple_value = reverse_sorted_hand[i];
                     break;
                 }
             }
             else{
-                temp = this.get_value(reverse_sorted_hand[i]);
+                temp = reverse_sorted_hand[i];
                 triple_count = 1;
             }
         }
@@ -719,22 +719,22 @@ class GamePage extends React.Component {
         //Check for the highest double, make sure not to count the triple cards though
         temp = 0;
         for(var i = 0; i < 7; i++){
-            if(temp == this.get_value(reverse_sorted_hand[i])){
+            if(temp == reverse_sorted_hand[i]){
                 double_count++;
                 if(double_count == 2){
-                    if(this.get_value(reverse_sorted_hand[i] == triple_value)){
+                    if(reverse_sorted_hand[i] == triple_value){
                         double_count = 1;
                         i++;
                     }
                     else{
                         pair_check = true;
-                        double_value = this.get_value(reverse_sorted_hand[i])
+                        double_value = reverse_sorted_hand[i];
                         break;
                     }
                 }
             }
             else{
-                this.temp = this.get_value(reverse_sorted_hand[i]);
+                this.temp = reverse_sorted_hand[i];
                 double_count = 1;
             }
         }
@@ -862,6 +862,66 @@ class GamePage extends React.Component {
         return triple_value;
 
     }
+    
+    double_pair_check(current_cards){
+        var sorted_hand_values_temp;
+        for(var i = 0; i < 7; i++){
+            sorted_hand_values_temp[i] = this.get_value(current_cards[i]);
+        }
+        var reverse_sorted_hand = sorted_hand_values_temp.sort(function(a, b) {return b-a;}); //Reverse sort to find the highest triple/pair first
+        var double_1_check = false;
+        var pair_2_check = false;
+        var double_count_1 = 0;
+        var double_value_1 = 0;
+        var double_count_2 = 0;
+        var double_value_2 = 0;
+        var temp = 0;
+        //Check for the highest double
+        for(var i = 0; i < 7; i++){
+            if(temp == reverse_sorted_hand[i]){
+                double_count_1++;
+                if(double_count_1 == 2){
+                    double_1_check = true;
+                    double_value_1 = reverse_sorted_hand[i];
+                    break;
+                }
+            }
+            else{
+                temp = reverse_sorted_hand[i];
+                double_count_1 = 1;
+            }
+        }
+        if(double_1_check = false){
+            return [0];
+        }
+        //Check for the highest double, make sure not to count the triple cards though
+        temp = 0;
+        for(var i = 0; i < 7; i++){
+            if(temp == reverse_sorted_hand[i]){
+                double_count_2++;
+                if(double_count_2 == 2){
+                    if(reverse_sorted_hand[i] == double_value_1){
+                        double_count_2 = 1;
+                        i++;
+                    }
+                    else{
+                        pair_2_check = true;
+                        double_value_2 = reverse_sorted_hand[i];
+                        break;
+                    }
+                }
+            }
+            else{
+                temp = reverse_sorted_hand[i];
+                double_count_2 = 1;
+            }
+        }
+        if(pair_2_check = false){
+            return [0]
+        }
+        return [double_value_1, double_value_2];
+    }
+
 
     pair_check(current_cards){
         var sorted_hand_values_temp;
