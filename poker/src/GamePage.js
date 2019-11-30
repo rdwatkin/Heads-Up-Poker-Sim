@@ -651,8 +651,8 @@ class GamePage extends React.Component {
         return  card.slice(card.length-1, card.length);
     }
 
-    hand_check(){
-        var hand = [this.state.Ca1, this.state.Ca2, this.state.Ca3, this.state.Ca4, this.state.Ca5, this.state.P1C1, this.state.P1C2];
+    hand_check(card1, card2){
+        var hand = [this.state.Ca1, this.state.Ca2, this.state.Ca3, this.state.Ca4, this.state.Ca5, card1, card2];
         if(this.royal_flush_check(hand)){
             return "royal flush";
         }
@@ -729,6 +729,51 @@ class GamePage extends React.Component {
             return [0,0]
         }
         return [triple_value, double_value];
+    }
+
+    flush_check(current_cards){
+        var flush_check = false;
+        var spade_flush_check = 0;
+        var club_flush_check = 0;
+        var heart_flush_check = 0;
+        var diamond_flush_check = 0;
+        for(var i = 0; i < 7; i++){
+            if(this.get_suit(current_cards[i]) == "S"){
+                spade_flush_check++;
+           }
+        }
+        if(spade_flush_check >= 5){
+            return [6];
+            flush_check = true;
+        }
+        for(var i = 0; i < 7; i++){
+            if(this.get_suit(current_cards[i]) == "C"){
+                club_flush_check++;
+           }
+        }
+        if(club_flush_check >= 5){
+            return [6];
+            flush_check = true;
+        }
+        for(var i = 0; i < 7; i++){
+            if(this.get_suit(current_cards[i]) == "H"){
+                heart_flush_check++;
+           }
+        }
+        if(heart_flush_check >= 5){
+            return [6];
+            flush_check = true;
+        }
+        for(var i = 0; i < 7; i++){
+            if(this.get_suit(current_cards[i]) == "D"){
+                diamond_flush_check++;
+           }
+        }
+        if(diamond_flush_check >= 5){
+            return [6];
+            flush_check = true;
+        }
+        return [0];
     }
 
     triple_check(current_cards){
