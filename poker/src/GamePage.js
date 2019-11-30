@@ -660,12 +660,21 @@ class GamePage extends React.Component {
 
     royal_flush_check(current_cards){
         var royals_check = false;
-        var same_suit_check = false
-        var sorted_hand = current_cards.sort(function(a, b) {return a-b;});
-        if(this.get_value(sorted_hand[2]) == 10 && this.get_value(sorted_hand[3]) == 11 && this.get_value(sorted_hand[4]) == 12 && this.get_value(sorted_hand[5]) == 13 && this.get_value(sorted_hand[6]) == 14){
+        var same_suit_check = false;
+        var sorted_hand_values_temp;
+        var sorted_hand_suits_temp;
+        for(var i = 0; i < 7; i++){
+            sorted_hand_values_temp[i] = this.get_value(current_cards[i]);
+        }
+        for(var i = 0; i < 7; i++){
+            sorted_hand_suits_temp[i] = this.get_suit(current_cards[i]);
+        }
+        var sorted_hand_values = sorted_hand_values_temp.sort(function(a, b) {return a-b;});
+        var sorted_hand_suits = sorted_hand_suits_temp.sort(function(a, b) {return a-b;});
+        if(sorted_hand_values[2] == 10 && sorted_hand_values[3] == 11 && sorted_hand_values[4] == 12 && sorted_hand_values[5] == 13 && sorted_hand_values[6] == 14){
             royals_check = true;
         }
-        if(this.get_suit(sorted_hand[2]) == this.get_suit(sorted_hand[3]) == this.get_suit(sorted_hand[4]) == this.get_suit(sorted_hand[5]) == this.get_suit(sorted_hand[6])){
+        if(sorted_hand_suits[2] == sorted_hand_suits[3] == sorted_hand_suits[4] == sorted_hand_suits[5] == sorted_hand_suits[6]){
             same_suit_check = true;
         } 
         if(royals_check == true && same_suit_check == true){
@@ -677,7 +686,11 @@ class GamePage extends React.Component {
     }
 
     full_house_check(current_cards){
-        var reverse_sorted_hand = current_cards.sort(function(a, b) {return b-a;}); //Reverse sort to find the highest triple/pair first
+        var sorted_hand_values_temp;
+        for(var i = 0; i < 7; i++){
+            sorted_hand_values_temp[i] = this.get_value(current_cards[i]);
+        }
+        var reverse_sorted_hand = sorted_hand_values_temp.sort(function(a, b) {return b-a;}); //Reverse sort to find the highest triple/pair first
         var triple_check = false;
         var pair_check = false;
         var triple_count = 0;
@@ -776,8 +789,54 @@ class GamePage extends React.Component {
         return [0];
     }
 
+    straight_check(current_cards){
+        var sorted_hand_values_temp;
+        for(var i = 0; i < 7; i++){
+            sorted_hand_values_temp[i] = this.get_value(current_cards[i]);
+        }
+        var reverse_sorted_hand = sorted_hand_values_temp.sort(function(a, b) {return b-a;});
+        var straight_count = 0;
+        var highest_card = reverse_sorted_hand[0];
+        for(var i = 0; i < 7; i++){
+            if(i != 6){
+                if(reverse_sorted_hand[i+1] == highest_card - 1){
+                    straight_count++; 
+                } 
+                else{
+                    straight_count = 0;
+                    highest_card = reverse_sorted_hand[i+1];
+                }
+            }
+        }
+        if(straight_count >= 5){
+            return [4, highest_card];
+        }
+        if(reverse_sorted_hand[0] == 14){
+            highest_card = 5;
+            for(var i = 3; i < 7; i++){
+                if(i != 6){
+                    if(reverse_sorted_hand[i+1] == highest_card - 1){
+                        straight_count++; 
+                    } 
+                    else{
+                        straight_count = 0;
+                        highest_card = reverse_sorted_hand[i+1];
+                    }
+
+                }
+            }
+        }
+        if(straight_count == 4){
+            return [4, 5];
+        }
+    }
+
     triple_check(current_cards){
-        var reverse_sorted_hand = current_cards.sort(function(a, b) {return b-a;}); //Reverse sort to find the highest triple/pair first
+        var sorted_hand_values_temp;
+        for(var i = 0; i < 7; i++){
+            sorted_hand_values_temp[i] = this.get_value(current_cards[i]);
+        }
+        var reverse_sorted_hand = sorted_hand_values_temp.sort(function(a, b) {return b-a;}); 
         var triple_check = false;
         var triple_count = 0;
         var triple_value = 0;
@@ -805,7 +864,11 @@ class GamePage extends React.Component {
     }
 
     pair_check(current_cards){
-        var reverse_sorted_hand = current_cards.sort(function(a, b) {return b-a;}); //Reverse sort to find the highest triple/pair first
+        var sorted_hand_values_temp;
+        for(var i = 0; i < 7; i++){
+            sorted_hand_values_temp[i] = this.get_value(current_cards[i]);
+        }
+        var reverse_sorted_hand = sorted_hand_values_temp.sort(function(a, b) {return b-a;}); 
         var double_check = false;
         var double_count = 0;
         var double_value = 0;
