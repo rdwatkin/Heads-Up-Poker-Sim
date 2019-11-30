@@ -185,9 +185,12 @@ class GamePage extends React.Component {
             this.update_where_in_game();
         } else if (this.state.where_in_game == "river"){
             //compare hands
-            var winner = "temp";
+            //var winner = "temp";
             //kenneth, can you call your function to determine a winner and have it return Player 1 or 2
             //winner = kenneth_function()
+            var p1_hand = this.hand_check(this.state.cards_dealt[5], this.state.cards_dealt[6]);
+            var p2_hand = this.hand_check(this.state.cards_dealt[7], this.state.cards_dealt[8]);
+            var winner = this.hand_compare(p1_hand, p2_hand);
             
             //give winner chips
             if (winner == this.state.Player1){
@@ -251,10 +254,12 @@ class GamePage extends React.Component {
                 this.update_where_in_game();
             } else if (this.state.where_in_game == "river"){
                 //compare hands
-                var winner = "temp";
                 //kenneth, can you call your function to determine a winner and have it return Player 1 or 2
                 //winner = kenneth_function()
-            
+                var p1_hand = this.hand_check(this.state.cards_dealt[5], this.state.cards_dealt[6]);
+                var p2_hand = this.hand_check(this.state.cards_dealt[7], this.state.cards_dealt[8]);
+                var winner = this.hand_compare(p1_hand, p2_hand);
+
                 //give winner chips
                 if (winner == this.state.Player1){
                     this.state.P1chips += this.state.pot;
@@ -661,6 +666,10 @@ class GamePage extends React.Component {
         if(return_array[0] == 8){
             return return_array;
         }
+        return_array = this.four_kind_check(hand);
+        if(return_array[0] == 7){
+            return return_array;
+        }
         return_array = this.full_house_check(hand);
         if(return_array[0] == 6){
             return return_array;
@@ -685,8 +694,138 @@ class GamePage extends React.Component {
         if(return_array[0] == 1){
             return return_array;
         }
-        return [0];
+        var largest_card = 0;
+        for(var i = 0; i < 7; i++){
+            if(this.get_value(hand[i]) > largest_card){
+                largest_card = this.get_value(hand[i]);
+            }
+        }
+        return [0, largest_card];
 
+    }
+
+    hand_compare(hand1, hand2){
+        if(hand1[0] > hand2[0]){
+            return 1;
+        }
+        else if(hand1[0] < hand2[0]){
+            return 2;
+        }
+        else{
+            if(hand1[0] == 9){
+                return 3;
+            }
+            else if(hand1[0] == 8){
+                if(hand1[1] > hand2[1]){
+                    return 1;
+                }
+                else if(hand1[1] < hand2[1]){
+                    return 2;
+                }
+                else{
+                    return 3;
+                }
+            }
+            else if(hand1[0] == 7){
+                if(hand1[1] > hand2[1]){
+                    return 1;
+                } 
+                else if(hand1[1] < hand2[1]){
+                    return 2;
+                }
+                else{
+                    return 3;
+                }
+            }
+            else if(hand1[0] == 6){
+                if(hand1[1] > hand2[1]){
+                    return 1;
+                }
+                else if(hand1[1] < hand2[1]){
+                    return 2;
+                }
+                else{
+                    if(hand1[2] > hand2[2]){
+                        return 1;
+                    }
+                    else if(hand1[2] < hand2[2]){
+                        return 2;
+                    }
+                    else{
+                        return 3;
+                    }
+                }
+            }
+            else if(hand1[0] == 5){
+                return 3;
+            }
+            else if(hand1[0] == 4){
+                if (hand1[1] > hand2[1]){
+                    return 1;
+                }
+                else if(hand1[1] < hand2[1]){
+                    return 2;
+                }
+                else{
+                    return 3;
+                }
+            }
+            else if(hand1[0] == 3){
+                if (hand1[1] > hand2[1]){
+                    return 1;
+                }
+                else if(hand1[1] < hand2[1]){
+                    return 2;
+                }
+                else{
+                    return 3;
+                }
+            }
+            else if(hand1[0] == 2){
+                if (hand1[1] > hand2[1]){
+                    return 1;
+                }
+                else if(hand1[1] < hand2[1]){
+                    return 2;
+                }
+                else{
+                    if (hand1[2] > hand2[2]){
+                        return 1;
+                    }
+                    else if(hand1[2] < hand2[2]){
+                        return 2;
+                    }
+                    else{
+                        return 3;
+                    }
+
+                }
+
+            }
+            else if(hand1[0] == 1){
+                if (hand1[1] > hand2[1]){
+                    return 1;
+                }
+                else if(hand1[1] < hand2[1]){
+                    return 2;
+                }
+                else{
+                    return 3;
+                }
+            }
+            else{
+                if (hand1[1] > hand2[1]){
+                    return 1;
+                }
+                else if(hand1[1] < hand2[1]){
+                    return 2;
+                }
+                else{
+                    return 3;
+                }
+
+            }
+        }
     }
 
     royal_flush_check(current_cards){
@@ -700,19 +839,22 @@ class GamePage extends React.Component {
         for(var i = 0; i < 7; i++){
             sorted_hand_suits_temp[i] = this.get_suit(current_cards[i]);
         }
-        var sorted_hand_values = sorted_hand_values_temp.sort(function(a, b) {return a-b;});
-        var sorted_hand_suits = sorted_hand_suits_temp.sort(function(a, b) {return a-b;});
-        if(sorted_hand_values[2] == 10 && sorted_hand_values[3] == 11 && sorted_hand_values[4] == 12 && sorted_hand_values[5] == 13 && sorted_hand_values[6] == 14){
+        var list = [];
+        for(var j = 0; j < 7; j++){
+            list.push({'value': sorted_hand_values_temp[i], 'suit': sorted_hand_suits_temp[i]});
+        }
+        var sorted_hand = list.sort(function(a, b) {return a.value - b.value});
+        if(sorted_hand[2].value == 10 && sorted_hand[3].value == 11 && sorted_hand[4].value == 12 && sorted_hand[5].value == 13 && sorted_hand[6].value == 14){
             royals_check = true;
         }
-        if(sorted_hand_suits[2] == sorted_hand_suits[3] == sorted_hand_suits[4] == sorted_hand_suits[5] == sorted_hand_suits[6]){
+        if(sorted_hand[2].suit == sorted_hand[3].suit == sorted_hand[4].suit == sorted_hand[5].suit == sorted_hand[6].suit){
             same_suit_check = true;
         } 
         if(royals_check == true && same_suit_check == true){
-            return true;
+            return [9];
         }
         else{
-            return false;
+            return [0];
         }
     }
 
@@ -725,37 +867,41 @@ class GamePage extends React.Component {
         for(var i = 0; i < 7; i++){
             sorted_hand_suits_temp[i] = this.get_suit(current_cards[i]);
         }
-        var sorted_hand_values = sorted_hand_values_temp.sort(function(a, b) {return b-a;});
-        var sorted_hand_suits = sorted_hand_suits.sort(function(a, b) {return b-a;});
+        var list = [];
+        for(var j = 0; j < 7; j++){
+            list.push({'value': sorted_hand_values_temp[i], 'suit': sorted_hand_suits_temp[i]});
+        }
+        var sorted_hand = list.sort(function(a, b) {return a.value - b.value});
+
         var straight_count = 1;
-        var highest_card_value = sorted_hand_values[0];
-        var highest_card_suit = sorted_hand_suits[0];
+        var highest_card_value = sorted_hand[0].value;
+        var highest_card_suit = sorted_hand[0].suit;
         var temp = highest_card_value;
         for(var i = 0; i < 7; i++){
             if(i != 6){
-                if((sorted_hand_values[i+1] == temp - 1) && (sorted_hand_suits[i+1] == highest_card_suit)){
+                if((sorted_hand[i+1].value == temp - 1) && (sorted_hand[i+1].suit == highest_card_suit)){
                     straight_count++; 
                     temp--;
                 } 
                 else{
                     straight_count = 1;
-                    highest_card_value = sorted_hand_values[i+1];
-                    highest_card_suit = sorted_hand_suits[i+1];
+                    highest_card_value = sorted_hand[i+1].value;
+                    highest_card_suit = sorted_hand[i+1].suit;
                     temp = highest_card_value;
                 }
             }
         }
         if(straight_count >= 5){
-            return [4, highest_card_value];
+            return [8, highest_card_value];
         }
-        if(sorted_hand_values[0] == 14){
+        if(sorted_hand[0].value == 14){
             highest_card_value = 5;
-            highest_card_suit = sorted_hand_suits[0];
+            highest_card_suit = sorted_hand[0].suit;
             temp = highest_card_value;
             straight_count = 1;
             for(var i = 3; i < 7; i++){
                 if(i != 6){
-                    if((sorted_hand_values[i+1] == temp - 1) && (highest_card_suit == sorted_hand_suits[i+1])){
+                    if((sorted_hand[i+1].value == temp - 1) && (highest_card_suit == sorted_hand[i+1].suit)){
                         straight_count++; 
                         temp--;
                     } 
@@ -767,10 +913,41 @@ class GamePage extends React.Component {
             }
         }
         if(straight_count == 4){
-            return [4, 5];
+            return [8, 5];
         }
     }
 
+    four_kind_check(current_cards){
+        var sorted_hand_values_temp;
+        for(var i = 0; i < 7; i++){
+            sorted_hand_values_temp[i] = this.get_value(current_cards[i]);
+        }
+        var reverse_sorted_hand = sorted_hand_values_temp.sort(function(a, b) {return b-a;}); 
+        var quad_check = false;
+        var quad_count = 0;
+        var quad_value = 0;
+        var temp = 0;
+        //Check for the highest triple
+        for(var i = 0; i < 7; i++){
+            if(temp == this.get_value(reverse_sorted_hand[i])){
+                quad_count++;
+                if(quad_count == 4){
+                    quad_check = true;
+                    quad_value = this.get_value(reverse_sorted_hand[i])
+                    break;
+                }
+            }
+            else{
+                temp = this.get_value(reverse_sorted_hand[i]);
+                quad_count = 1;
+            }
+        }
+        if(quad_check = false){
+            return [0];
+        }
+        return [7, quad_value];
+ 
+    }
     full_house_check(current_cards){
         var sorted_hand_values_temp;
         for(var i = 0; i < 7; i++){
@@ -827,7 +1004,7 @@ class GamePage extends React.Component {
         if(pair_check = false){
             return [0,0]
         }
-        return [triple_value, double_value];
+        return [6, triple_value, double_value];
     }
 
     flush_check(current_cards){
@@ -842,7 +1019,7 @@ class GamePage extends React.Component {
            }
         }
         if(spade_flush_check >= 5){
-            return [6];
+            return [5];
             flush_check = true;
         }
         for(var i = 0; i < 7; i++){
@@ -851,7 +1028,7 @@ class GamePage extends React.Component {
            }
         }
         if(club_flush_check >= 5){
-            return [6];
+            return [5];
             flush_check = true;
         }
         for(var i = 0; i < 7; i++){
@@ -860,7 +1037,7 @@ class GamePage extends React.Component {
            }
         }
         if(heart_flush_check >= 5){
-            return [6];
+            return [5];
             flush_check = true;
         }
         for(var i = 0; i < 7; i++){
@@ -869,7 +1046,7 @@ class GamePage extends React.Component {
            }
         }
         if(diamond_flush_check >= 5){
-            return [6];
+            return [5];
             flush_check = true;
         }
         return [0];
@@ -951,7 +1128,7 @@ class GamePage extends React.Component {
         if(triple_check = false){
             return 0;
         }
-        return triple_value;
+        return [3, triple_value];
 
     }
     
@@ -994,7 +1171,6 @@ class GamePage extends React.Component {
                 if(double_count_2 == 2){
                     if(reverse_sorted_hand[i] == double_value_1){
                         double_count_2 = 1;
-                        i++;
                     }
                     else{
                         pair_2_check = true;
@@ -1011,7 +1187,7 @@ class GamePage extends React.Component {
         if(pair_2_check = false){
             return [0]
         }
-        return [double_value_1, double_value_2];
+        return [2, double_value_1, double_value_2];
     }
 
 
@@ -1043,7 +1219,7 @@ class GamePage extends React.Component {
         if(double_check = false){
             return 0;
         }
-        return double_value;
+        return [1, double_value];
     } 
 //------------------------------------Hand Comparisons Above ---------------------------------------
 
