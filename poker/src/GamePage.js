@@ -731,7 +731,7 @@ class GamePage extends React.Component {
         }
         console.log("no pair");
         var largest_card = 0;
-        for(var i = 0; i < 7; i++){
+        for(var i = 5; i < 7; i++){
             if(this.get_value(hand[i]) > largest_card){
                 largest_card = this.get_value(hand[i]);
             }
