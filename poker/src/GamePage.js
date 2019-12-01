@@ -674,7 +674,8 @@ class GamePage extends React.Component {
 
     hand_check(card1, card2){
         var hand = [this.state.Ca1, this.state.Ca2, this.state.Ca3, this.state.Ca4, this.state.Ca5, card1, card2];
-        var return_array = this.royal_flush_check(hand);
+        var return_array = [];
+        return_array = this.royal_flush_check(hand);
         if(return_array[0] == 9){
             return return_array;
         }
@@ -847,8 +848,8 @@ class GamePage extends React.Component {
     royal_flush_check(current_cards){
         var royals_check = false;
         var same_suit_check = false;
-        var sorted_hand_values_temp;
-        var sorted_hand_suits_temp;
+        var sorted_hand_values_temp = [];
+        var sorted_hand_suits_temp = [];
         for(var i = 0; i < 7; i++){
             sorted_hand_values_temp[i] = this.get_value(current_cards[i]);
         }
@@ -875,8 +876,8 @@ class GamePage extends React.Component {
     }
 
     straight_flush_check(current_cards){
-        var sorted_hand_values_temp;
-        var sorted_hand_suits_temp;
+        var sorted_hand_values_temp = [];
+        var sorted_hand_suits_temp = [];
         for(var i = 0; i < 7; i++){
             sorted_hand_values_temp[i] = this.get_value(current_cards[i]);
         }
@@ -931,30 +932,32 @@ class GamePage extends React.Component {
         if(straight_count == 4){
             return [8, 5];
         }
+        return [0];
     }
 
     four_kind_check(current_cards){
-        var sorted_hand_values_temp;
+        var sorted_hand_values_temp = [];
         for(var i = 0; i < 7; i++){
             sorted_hand_values_temp[i] = this.get_value(current_cards[i]);
         }
-        var reverse_sorted_hand = sorted_hand_values_temp.sort(function(a, b) {return b-a;}); 
+        var reverse_sorted_hand = [];
+        reverse_sorted_hand = sorted_hand_values_temp.sort(function(a, b) {return b-a;}); 
         var quad_check = false;
         var quad_count = 0;
         var quad_value = 0;
         var temp = 0;
         //Check for the highest triple
         for(var i = 0; i < 7; i++){
-            if(temp == this.get_value(reverse_sorted_hand[i])){
+            if(temp == reverse_sorted_hand[i]){
                 quad_count++;
                 if(quad_count == 4){
                     quad_check = true;
-                    quad_value = this.get_value(reverse_sorted_hand[i])
+                    quad_value = reverse_sorted_hand[i]
                     break;
                 }
             }
             else{
-                temp = this.get_value(reverse_sorted_hand[i]);
+                temp = reverse_sorted_hand[i];
                 quad_count = 1;
             }
         }
@@ -965,7 +968,7 @@ class GamePage extends React.Component {
  
     }
     full_house_check(current_cards){
-        var sorted_hand_values_temp;
+        var sorted_hand_values_temp = [];
         for(var i = 0; i < 7; i++){
             sorted_hand_values_temp[i] = this.get_value(current_cards[i]);
         }
@@ -1069,7 +1072,7 @@ class GamePage extends React.Component {
     }
 
     straight_check(current_cards){
-        var sorted_hand_values_temp;
+        var sorted_hand_values_temp = [];
         for(var i = 0; i < 7; i++){
             sorted_hand_values_temp[i] = this.get_value(current_cards[i]);
         }
@@ -1117,7 +1120,7 @@ class GamePage extends React.Component {
     }
 
     triple_check(current_cards){
-        var sorted_hand_values_temp;
+        var sorted_hand_values_temp = [];
         for(var i = 0; i < 7; i++){
             sorted_hand_values_temp[i] = this.get_value(current_cards[i]);
         }
@@ -1149,7 +1152,7 @@ class GamePage extends React.Component {
     }
     
     double_pair_check(current_cards){
-        var sorted_hand_values_temp;
+        var sorted_hand_values_temp = [];
         for(var i = 0; i < 7; i++){
             sorted_hand_values_temp[i] = this.get_value(current_cards[i]);
         }
@@ -1208,7 +1211,7 @@ class GamePage extends React.Component {
 
 
     pair_check(current_cards){
-        var sorted_hand_values_temp;
+        var sorted_hand_values_temp = [];
         for(var i = 0; i < 7; i++){
             sorted_hand_values_temp[i] = this.get_value(current_cards[i]);
         }
