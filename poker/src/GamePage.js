@@ -97,6 +97,7 @@ class GamePage extends React.Component {
         fire.database().ref("/Root/GameID/").update({
             cur_bet: amount
         })
+        /*
         if (this.state.cur_bet == 0){
             document.getElementById('bet amount').style.visibility='hidden';
             document.getElementById('Fold').style.visibility='hidden';
@@ -106,8 +107,9 @@ class GamePage extends React.Component {
             document.getElementById('Fold').style.visibility='visible';
             document.getElementById('Raise').style.visibility='visible';
         }
+        */
         //adjust chips and pot size
-        if (this.state.currTurn == this.state.Me){
+        if (this.state.currTurn == "Player1"){
             this.state.P1chips -= amount;
             this.update_P1chips();
             this.state.pot += amount;
@@ -129,6 +131,7 @@ class GamePage extends React.Component {
         fire.database().ref("/Root/GameID/").update({
             cur_bet: amount - this.state.cur_bet
         })
+        /*
         if (this.state.cur_bet == 0){
             document.getElementById('bet amount').style.visibility='hidden';
             document.getElementById('Fold').style.visibility='hidden';
@@ -138,7 +141,8 @@ class GamePage extends React.Component {
             document.getElementById('Fold').style.visibility='visible';
             document.getElementById('Raise').style.visibility='visible';
         }
-        if (this.state.currTurn == this.state.Me){
+        */
+        if (this.state.currTurn == "Player1"){
             this.state.P1chips -= amount;
             this.update_P1chips();
             this.state.pot += amount;
@@ -154,7 +158,7 @@ class GamePage extends React.Component {
 
     call(){
         //put chips in pot
-        if (this.state.currTurn == this.state.Me){
+        if (this.state.currTurn == "Player1"){
             this.state.P1chips -= this.state.cur_bet;
             this.update_P1chips();
             this.state.pot += this.state.cur_bet;
@@ -227,6 +231,7 @@ class GamePage extends React.Component {
         fire.database().ref("/Root/GameID/").update({
             cur_bet: 0
         })
+        /*
         if (this.state.cur_bet == 0){
             document.getElementById('bet amount').style.visibility='hidden';
             document.getElementById('Fold').style.visibility='hidden';
@@ -236,6 +241,7 @@ class GamePage extends React.Component {
             document.getElementById('Fold').style.visibility='visible';
             document.getElementById('Raise').style.visibility='visible';
         }
+        */
     }
 
     check(){
@@ -303,7 +309,7 @@ class GamePage extends React.Component {
 
     fold(){
         //give pot to other player
-        if (this.state.currTurn == this.state.Me){
+        if (this.state.currTurn == "Player2"){
             this.state.P1chips += this.state.pot;
             this.update_P1chips();
         } else {
@@ -314,6 +320,7 @@ class GamePage extends React.Component {
         fire.database().ref("/Root/GameID/").update({
             cur_bet: 0
         })
+        /*
         if (this.state.cur_bet == 0){
             document.getElementById('bet amount').style.visibility='hidden';
             document.getElementById('Fold').style.visibility='hidden';
@@ -323,6 +330,7 @@ class GamePage extends React.Component {
             document.getElementById('Fold').style.visibility='visible';
             document.getElementById('Raise').style.visibility='visible';
         }
+        */
         fire.database().ref("/Root/GameID/").once('value', snapshot => {
             /* Set State Variables */
             this.setState({
@@ -381,7 +389,7 @@ class GamePage extends React.Component {
     }
 
     upload_turn(){
-        var whos_turn = "Player 1";
+        var whos_turn = "Player1";
         fire.database().ref("/Root/GameID/turn").set({
             currTurn: whos_turn
         })
@@ -392,8 +400,8 @@ class GamePage extends React.Component {
         var turn = this.state.currTurn;
         var P1 = this.state.P1email;
         var P2 = this.state.P2email;
-        if(turn == "Player 1"){
-            var newTurn = "Player 2";
+        if(turn == "Player1"){
+            var newTurn = "Player2";
             fire.database().ref("/Root/GameID/turn").update({
                 currTurn: newTurn
             })
@@ -404,7 +412,7 @@ class GamePage extends React.Component {
             })
         }
         else{
-            var newTurn = "Player 1";
+            var newTurn = "Player1";
             fire.database().ref("/Root/GameID/turn").update({
                 currTurn: newTurn
             })
@@ -482,7 +490,7 @@ class GamePage extends React.Component {
         var P2 = this.state.P2email;
         var SB = this.state.smallblind;
         if(SB == "P2"){
-            var newTurn = "Player 2";
+            var newTurn = "Player2";
             fire.database().ref("/Root/GameID/turn").update({
                 currTurn: newTurn
             })
@@ -493,7 +501,7 @@ class GamePage extends React.Component {
             })
         }
         else{
-            var newTurn = "Player 1";
+            var newTurn = "Player1";
             fire.database().ref("/Root/GameID/turn").update({
                 currTurn: newTurn
             })
@@ -529,7 +537,7 @@ class GamePage extends React.Component {
         var P2 = this.state.P2email;
         var SB = this.state.smallblind;
         if(SB == "P2"){
-            var newTurn = "Player 2";
+            var newTurn = "Player2";
             fire.database().ref("/Root/GameID/turn").update({
                 currTurn: newTurn
             })
@@ -540,7 +548,7 @@ class GamePage extends React.Component {
             })
         }
         else{
-            var newTurn = "Player 1";
+            var newTurn = "Player1";
             fire.database().ref("/Root/GameID/turn").update({
                 currTurn: newTurn
             })
@@ -576,7 +584,7 @@ class GamePage extends React.Component {
         var P2 = this.state.P2email;
         var SB = this.state.smallblind;
         if(SB == "P2"){
-            var newTurn = "Player 2";
+            var newTurn = "Player2";
             fire.database().ref("/Root/GameID/turn").update({
                 currTurn: newTurn
             })
@@ -587,7 +595,7 @@ class GamePage extends React.Component {
             })
         }
         else{
-            var newTurn = "Player 1";
+            var newTurn = "Player1";
             fire.database().ref("/Root/GameID/turn").update({
                 currTurn: newTurn
             })
@@ -1254,6 +1262,7 @@ begin_hand(){
     fire.database().ref("/Root/GameID/").update({
         cur_bet: 0
     })
+    /*
     if (this.state.cur_bet == 0){
         document.getElementById('bet amount').style.visibility='hidden';
         document.getElementById('Fold').style.visibility='hidden';
@@ -1263,6 +1272,7 @@ begin_hand(){
         document.getElementById('Fold').style.visibility='visible';
         document.getElementById('Raise').style.visibility='visible';
     }
+    */
     this.state.Ca1 = "back";
     this.state.Ca2 = "back";
     this.state.Ca3 = "back";
@@ -1339,11 +1349,11 @@ begin_hand(){
         return (
             <div>
                 <div style={{display: 'flex', justifyContent: 'center', height: "50%", margin: '50px'}}>
-                    <h1><u>It is {this.state.Turn_Email}'s turn</u></h1>
+                    <h1><u>It is {this.state.currTurn}'s turn</u></h1>
                 </div>
                 <div style={{display: 'flex', justifyContent: 'center', height: "50%", margin: '50px'}}>
                     <h1 style={{textAlign: "center", margin: '30px', marginLeft: '210px'}}>
-                        Opponent Stack<br/> {this.state.P2chips} </h1>
+                        Player2's Stack<br/> {this.state.P2chips} </h1>
                     { this.get_card_img("back") }
                     { this.get_card_img("back") }
                 </div>
@@ -1360,7 +1370,7 @@ begin_hand(){
                 <div style={{display: 'flex', justifyContent: 'center', height: "100%", margin: '50px'}}>
                     <h1 id = "bet amount" style={{textAlign: "center", margin: '30px'}}>Amount to Call<br/> {this.state.cur_bet}</h1>
                     <h1 style={{textAlign: "center", margin: '30px', marginLeft: '300px'}}>
-                        My Stack<br/> {this.state.P1chips} </h1>
+                        Player1's Stack<br/> {this.state.P1chips} </h1>
                     { this.get_card_img(this.state.P1C1) }
                     { this.get_card_img(this.state.P1C2) }
  
