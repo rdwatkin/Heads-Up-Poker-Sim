@@ -664,7 +664,7 @@ class GamePage extends React.Component {
 //------------------------------------Hand Comparisons Below ---------------------------------------
 
     get_value(card){
-        var val = card.slice(0, card.length);
+        var val = card.slice(0, card.length-1);
         if(val == "1")
             return 14;
         else if(val == "J")
@@ -683,48 +683,60 @@ class GamePage extends React.Component {
     hand_check(card1, card2){
         var hand = [this.state.Ca1, this.state.Ca2, this.state.Ca3, this.state.Ca4, this.state.Ca5, card1, card2];
         var return_array = [];
+        //console.log(this.get_value(card1));
         return_array = this.royal_flush_check(hand);
         if(return_array[0] == 9){
             return return_array;
         }
+        console.log("no royal flush");
         return_array = this.straight_flush_check(hand);
         if(return_array[0] == 8){
             return return_array;
         }
+        console.log("no straight flush");
         return_array = this.four_kind_check(hand);
         if(return_array[0] == 7){
+            console.log(return_array[1]);
             return return_array;
         }
+        console.log("no four of a kind");
         return_array = this.full_house_check(hand);
         if(return_array[0] == 6){
             return return_array;
         }
+        console.log("no full house");
         return_array = this.flush_check(hand);
         if(return_array[0] == 5){
             return return_array;
         }
+        console.log("no flush");
         return_array = this.straight_check(hand);
         if(return_array[0] == 4){
             return return_array;
         }
+        console.log("no straihgt");
         return_array = this.triple_check(hand);
         if(return_array[0] == 3){
             return return_array;
         }
+        console.log("no triple");
         return_array = this.double_pair_check(hand);
         if(return_array[0] == 2){
             return return_array;
         }
+        console.log("no double pair");
         return_array = this.pair_check(hand);
         if(return_array[0] == 1){
             return return_array;
         }
+        console.log("no pair");
         var largest_card = 0;
         for(var i = 0; i < 7; i++){
             if(this.get_value(hand[i]) > largest_card){
                 largest_card = this.get_value(hand[i]);
             }
         }
+        //console.log(largest_card);
         return [0, largest_card];
 
     }
@@ -949,7 +961,7 @@ class GamePage extends React.Component {
             sorted_hand_values_temp[i] = this.get_value(current_cards[i]);
         }
         var reverse_sorted_hand = [];
-        reverse_sorted_hand = sorted_hand_values_temp.sort(function(a, b) {return b-a;}); 
+        reverse_sorted_hand = sorted_hand_values_temp.sort(function(a, b) {return b-a;});
         var quad_check = false;
         var quad_count = 0;
         var quad_value = 0;
@@ -959,6 +971,7 @@ class GamePage extends React.Component {
             if(temp == reverse_sorted_hand[i]){
                 quad_count++;
                 if(quad_count == 4){
+                    console.log(quad_count);
                     quad_check = true;
                     quad_value = reverse_sorted_hand[i]
                     break;
@@ -969,10 +982,13 @@ class GamePage extends React.Component {
                 quad_count = 1;
             }
         }
-        if(quad_check = false){
+        if(quad_check == false){
             return [0];
         }
-        return [7, quad_value];
+        else{
+            console.log("why are we in the else statement");
+            return [7, quad_value];
+        }
  
     }
     full_house_check(current_cards){
@@ -1003,9 +1019,11 @@ class GamePage extends React.Component {
                 triple_count = 1;
             }
         }
-        if(triple_check = false){
+        if(triple_check == false){
+            console.log("full house triple check false");
             return [0,0];
         }
+        console.log(triple_value);
         //Check for the highest double, make sure not to count the triple cards though
         temp = 0;
         for(var i = 0; i < 7; i++){
@@ -1024,13 +1042,16 @@ class GamePage extends React.Component {
                 }
             }
             else{
-                this.temp = reverse_sorted_hand[i];
+                temp = reverse_sorted_hand[i];
                 double_count = 1;
             }
         }
-        if(pair_check = false){
+        if(pair_check == false){
+            console.log("full house double check false");
+            console.log(double_value);
             return [0,0]
         }
+        console.log(double_value);
         return [6, triple_value, double_value];
     }
 
@@ -1084,7 +1105,8 @@ class GamePage extends React.Component {
         for(var i = 0; i < 7; i++){
             sorted_hand_values_temp[i] = this.get_value(current_cards[i]);
         }
-        var reverse_sorted_hand = sorted_hand_values_temp.sort(function(a, b) {return b-a;});
+        var reverse_sorted_hand = [];
+        reverse_sorted_hand = sorted_hand_values_temp.sort(function(a, b) {return b-a;});
         var straight_count = 1;
         var highest_card = reverse_sorted_hand[0];
         var temp = highest_card;
@@ -1125,6 +1147,7 @@ class GamePage extends React.Component {
         if(straight_count == 4){
             return [4, 5];
         }
+        return [0];
     }
 
     triple_check(current_cards){
@@ -1139,21 +1162,21 @@ class GamePage extends React.Component {
         var temp = 0;
         //Check for the highest triple
         for(var i = 0; i < 7; i++){
-            if(temp == this.get_value(reverse_sorted_hand[i])){
+            if(temp == reverse_sorted_hand){
                 triple_count++;
                 if(triple_count == 3){
                     triple_check = true;
-                    triple_value = this.get_value(reverse_sorted_hand[i])
+                    triple_value = reverse_sorted_hand[i]
                     break;
                 }
             }
             else{
-                temp = this.get_value(reverse_sorted_hand[i]);
+                temp = reverse_sorted_hand[i];
                 triple_count = 1;
             }
         }
-        if(triple_check = false){
-            return 0;
+        if(triple_check == false){
+            return [0];
         }
         return [3, triple_value];
 
@@ -1187,7 +1210,7 @@ class GamePage extends React.Component {
                 double_count_1 = 1;
             }
         }
-        if(double_1_check = false){
+        if(double_1_check == false){
             return [0];
         }
         //Check for the highest double, make sure not to count the triple cards though
@@ -1211,7 +1234,7 @@ class GamePage extends React.Component {
                 double_count_2 = 1;
             }
         }
-        if(pair_2_check = false){
+        if(pair_2_check == false){
             return [0]
         }
         return [2, double_value_1, double_value_2];
@@ -1230,21 +1253,21 @@ class GamePage extends React.Component {
         var temp = 0;
         //Check for the highest triple
         for(var i = 0; i < 7; i++){
-            if(temp == this.get_value(reverse_sorted_hand[i])){
+            if(temp == reverse_sorted_hand[i]){
                 double_count++;
                 if(double_count == 2){
                     double_check = true;
-                    double_value = this.get_value(reverse_sorted_hand[i])
+                    double_value = reverse_sorted_hand[i]
                     break;
                 }
             }
             else{
-                temp = this.get_value(reverse_sorted_hand[i]);
+                temp = reverse_sorted_hand[i];
                 double_count = 1;
             }
         }
-        if(double_check = false){
-            return 0;
+        if(double_check == false){
+            return [0];
         }
         return [1, double_value];
     } 
