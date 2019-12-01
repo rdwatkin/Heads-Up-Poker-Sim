@@ -17,7 +17,43 @@ import S10 from './images/10S.png'; import H10 from './images/10H.png'; import D
 import S11 from './images/JS.png';  import H11 from './images/JH.png';   import D11 from './images/JD.png'; import C11 from './images/JC.png';
 import S12 from './images/QS.png';  import H12 from './images/QH.png';  import D12 from './images/QD.png';  import C12 from './images/QC.png';
 import S13 from './images/KS.png';  import H13 from './images/KH.png';  import D13 from './images/KD.png';  import C13 from './images/KC.png';
- 
+
+/* Polyfill to resolve require.context() in jest from stackoverflow */
+if (typeof require.context === 'undefined') {
+  const fs = require('fs');
+  const path = require('path');
+
+  require.context = (base = '.', scanSubDirectories = false, regularExpression = /\.js$/) => {
+    const files = {};
+
+    function readDirectory(directory) {
+      fs.readdirSync(directory).forEach((file) => {
+        const fullPath = path.resolve(directory, file);
+
+        if (fs.statSync(fullPath).isDirectory()) {
+          if (scanSubDirectories) readDirectory(fullPath);
+
+          return;
+        }
+
+        if (!regularExpression.test(fullPath)) return;
+
+        files[fullPath] = true;
+      });
+    }
+
+    readDirectory(path.resolve(__dirname, base));
+
+    function Module(file) {
+      return require(file);
+    }
+
+    Module.keys = () => Object.keys(files);
+
+    return Module;
+  };
+}
+
 const images = require.context('./images', true);
 
 class GamePage extends React.Component {

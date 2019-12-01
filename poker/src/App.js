@@ -14,7 +14,7 @@ class App extends Component {
     }
 
     this.authListener = this.authListener.bind(this);
-    this.eventSource = new EventSource("events");
+    //this.eventSource = new EventSource("events");
   }
 
   componentDidMount() {
