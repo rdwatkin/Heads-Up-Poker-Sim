@@ -191,13 +191,21 @@ class GamePage extends React.Component {
             var p1_hand = this.hand_check(this.state.cards_dealt[5], this.state.cards_dealt[6]);
             var p2_hand = this.hand_check(this.state.cards_dealt[7], this.state.cards_dealt[8]);
             var winner = this.hand_compare(p1_hand, p2_hand);
-            
             //give winner chips
-            if (winner == this.state.Player1){
+            //if player 1 won
+            if (winner == 1){
                 this.state.P1chips += this.state.pot;
                 this.update_P1chips();
-            } else {
+            //if player 2 won
+            } else if (winner == 2){
                 this.state.P2chips += this.state.pot;
+                this.update_P2chips();
+            //if a tie
+            } else {
+                //split the pot
+                this.state.P1chips += this.state.pot/2;
+                this.update_P1chips();
+                this.state.P2chips += this.state.pot/2;
                 this.update_P2chips();
             }
             this.state.pot = 0;
@@ -259,13 +267,21 @@ class GamePage extends React.Component {
                 var p1_hand = this.hand_check(this.state.cards_dealt[5], this.state.cards_dealt[6]);
                 var p2_hand = this.hand_check(this.state.cards_dealt[7], this.state.cards_dealt[8]);
                 var winner = this.hand_compare(p1_hand, p2_hand);
-
                 //give winner chips
-                if (winner == this.state.Player1){
+                //if player 1 won
+                if (winner == 1){
                     this.state.P1chips += this.state.pot;
                     this.update_P1chips();
-                } else {
+                //if player 2 won
+                } else if (winner == 2){
                     this.state.P2chips += this.state.pot;
+                    this.update_P2chips();
+                //if a tie
+                } else {
+                    //split the pot
+                    this.state.P1chips += this.state.pot/2;
+                    this.update_P1chips();
+                    this.state.P2chips += this.state.pot/2;
                     this.update_P2chips();
                 }
                 this.state.pot = 0;
