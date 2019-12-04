@@ -1422,7 +1422,7 @@ begin_hand(){
                 </div>
                 <div style={{display: 'flex', justifyContent: 'center', height: "50%", margin: '50px'}}>
                     <h1 style={{textAlign: "center", margin: '30px', marginLeft: '210px'}}>
-                        Player2's Stack<br/> {this.state.P2chips} </h1>
+                        {this.state.P2email}'s stack<br/> {this.state.P2chips} </h1>
                     { this.get_card_img("back") }
                     { this.get_card_img("back") }
                 </div>
@@ -1439,7 +1439,7 @@ begin_hand(){
                 <div style={{display: 'flex', justifyContent: 'center', height: "100%", margin: '50px'}}>
                   <h1 id = "bet amount" style={{textAlign: "center", margin: '30px'}}>Amount to Call<br/> {this.state.cur_bet}</h1>
                     <h1 style={{textAlign: "center", margin: '30px', marginLeft: '300px'}}>
-                        Player1's Stack<br/> {this.state.P1chips} </h1>
+                    {this.state.P1email}'s stack <br/> {this.state.P1chips} </h1>
                     { this.get_card_img(this.state.P1C1) }
                     { this.get_card_img(this.state.P1C2) }
  
