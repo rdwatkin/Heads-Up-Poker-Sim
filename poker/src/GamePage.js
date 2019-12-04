@@ -65,8 +65,8 @@ class GamePage extends React.Component {
         this.state = {Ca1: "", Ca2: "", Ca3: "", Ca4: "", Ca5: "",
                       P1C1: "", P1C2: "", P2C1: "", P2C2: "", P1chips: "",
                       P2chips: "", pot: "", currTurn: "", P1: "", P2: "", Me: "",
-                      num_call: "", num_checks: "", where_in_game: "", P1email: "", 
-                      P2email: "", Turn_Email: "", smallblind: "" , cur_bet: ""}
+                      num_call: "", num_checks: "", where_in_game: "", myEmail: "", 
+                      theirEmail: "", Turn_Email: "", smallblind: "" , cur_bet: ""}
     }
 
     componentWillMount(){
@@ -84,14 +84,18 @@ class GamePage extends React.Component {
             var Player1 = snapshot.child("Player1").val();
             var Player2 = snapshot.child("Player2").val();
             var Fturn = snapshot.child("turn").child("currTurn").val()
-            var PoneEmail = snapshot.child("Player1_Email").child("email").val()
-            var PtwoEmail = snapshot.child("Player2_Email").child("email").val()
+            var mEmail = snapshot.child("Player1_Email").child("email").val()
+            var tEmail = snapshot.child("Player2_Email").child("email").val()
             var whoAmI = "";
             if (currUser == Player1){
                 whoAmI = "Player1"
             }else{
                 whoAmI = "Player2"
+                var tmp = mEmail
+                mEmail = tEmail
+                tEmail = tmp
             }
+            console.log(mEmail)
             /* Set State Variables */
             this.setState({
                 Ca1: Car1,
@@ -110,9 +114,9 @@ class GamePage extends React.Component {
                 Me: whoAmI,
                 num_checks: 0,
                 num_call: 0,
-                P1email: PoneEmail,
-                P2email: PtwoEmail,
-                Turn_Email: PoneEmail,
+                myEmail: mEmail,
+                theirEmail: tEmail,
+                Turn_Email: mEmail,
                 smallblind: "Begin",
                 cards_dealt: this.deal_nine_cards(),
                 where_in_game: "start",
@@ -1422,7 +1426,7 @@ begin_hand(){
                 </div>
                 <div style={{display: 'flex', justifyContent: 'center', height: "50%", margin: '50px'}}>
                     <h1 style={{textAlign: "center", margin: '30px', marginLeft: '210px'}}>
-                        {this.state.P2email}'s stack<br/> {this.state.P2chips} </h1>
+                        { this.state.theirEmail }'s stack<br/> {this.state.P2chips} </h1>
                     { this.get_card_img("back") }
                     { this.get_card_img("back") }
                 </div>
@@ -1439,7 +1443,7 @@ begin_hand(){
                 <div style={{display: 'flex', justifyContent: 'center', height: "100%", margin: '50px'}}>
                   <h1 id = "bet amount" style={{textAlign: "center", margin: '30px'}}>Amount to Call<br/> {this.state.cur_bet}</h1>
                     <h1 style={{textAlign: "center", margin: '30px', marginLeft: '300px'}}>
-                    {this.state.P1email}'s stack <br/> {this.state.P1chips} </h1>
+                    {this.state.myEmail}'s stack <br/> {this.state.P1chips} </h1>
                     { this.get_card_img(this.state.P1C1) }
                     { this.get_card_img(this.state.P1C2) }
  
