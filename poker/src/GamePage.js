@@ -65,8 +65,9 @@ class GamePage extends React.Component {
         this.state = {Ca1: "", Ca2: "", Ca3: "", Ca4: "", Ca5: "",
                       P1C1: "", P1C2: "", P2C1: "", P2C2: "", P1chips: "",
                       P2chips: "", pot: "", currTurn: "", P1: "", P2: "", Me: "",
-                      num_call: "", num_checks: "", where_in_game: "", myEmail: "", 
-                      theirEmail: "", Turn_Email: "", smallblind: "" , cur_bet: ""}
+                      num_call: "", num_checks: "", where_in_game: "", P1email: "",
+                      P2email: "", myEmail: "", theirEmail: "", Turn_Email: "", 
+                      smallblind: "" , cur_bet: "", myChips: "", theirChips: "" }
     }
 
     componentWillMount(){
@@ -86,6 +87,8 @@ class GamePage extends React.Component {
             var Fturn = snapshot.child("turn").child("currTurn").val()
             var mEmail = snapshot.child("Player1_Email").child("email").val()
             var tEmail = snapshot.child("Player2_Email").child("email").val()
+            var poneEmail = snapshot.child("Player1_Email").child("email").val()
+            var ptwoEmail = snapshot.child("Player2_Email").child("email").val()
             var whoAmI = "";
             if (currUser == Player1){
                 whoAmI = "Player1"
@@ -96,6 +99,7 @@ class GamePage extends React.Component {
                 tEmail = tmp
             }
             console.log(mEmail)
+            console.log(Player1)
             /* Set State Variables */
             this.setState({
                 Ca1: Car1,
@@ -116,6 +120,8 @@ class GamePage extends React.Component {
                 num_call: 0,
                 myEmail: mEmail,
                 theirEmail: tEmail,
+                P1email: poneEmail,
+                P2email: ptwoEmail,
                 Turn_Email: mEmail,
                 smallblind: "Begin",
                 cards_dealt: this.deal_nine_cards(),
@@ -1368,6 +1374,7 @@ begin_hand(){
         //update on display
         this.state.P1chips -= 25;
         this.update_P1chips();
+
         this.state.P2chips -= 50;
         this.update_P2chips();
     } else {
@@ -1398,6 +1405,19 @@ begin_hand(){
         var Car5 = snapshot.child("C5").val()
         var P1Ca1 = snapshot.child(currUser).child("C1").val()
         var P1Ca2 = snapshot.child(currUser).child("C2").val()
+        var mChips = 0;
+        var tChips = 0;
+        
+        if ( this.state.Me == "Player1" ){
+        		console.log("Player1")
+                mChips = P1Chips
+                tChips = P2Chips
+            }else{
+            	console.log("Player2")
+                mChips = P2Chips
+                tChips = P1Chips
+        }
+
             this.setState({
                 Ca1: Car1,
                 Ca2: Car2,
@@ -1408,6 +1428,8 @@ begin_hand(){
                 P1C2: P1Ca2,
                 P2chips: P2Chips,
                 P1chips: P1Chips,
+                myChips: mChips,
+                theirChips: tChips,
                 where_in_game: where,
                 pot: sPOT,
                 num_call: ncall,
@@ -1426,7 +1448,7 @@ begin_hand(){
                 </div>
                 <div style={{display: 'flex', justifyContent: 'center', height: "50%", margin: '50px'}}>
                     <h1 style={{textAlign: "center", margin: '30px', marginLeft: '210px'}}>
-                        { this.state.theirEmail }'s stack<br/> {this.state.P2chips} </h1>
+                        { this.state.theirEmail }'s stack<br/> {this.state.theirChips} </h1>
                     { this.get_card_img("back") }
                     { this.get_card_img("back") }
                 </div>
@@ -1443,7 +1465,7 @@ begin_hand(){
                 <div style={{display: 'flex', justifyContent: 'center', height: "100%", margin: '50px'}}>
                   <h1 id = "bet amount" style={{textAlign: "center", margin: '30px'}}>Amount to Call<br/> {this.state.cur_bet}</h1>
                     <h1 style={{textAlign: "center", margin: '30px', marginLeft: '300px'}}>
-                    {this.state.myEmail}'s stack <br/> {this.state.P1chips} </h1>
+                    {this.state.myEmail}'s stack <br/> {this.state.myChips} </h1>
                     { this.get_card_img(this.state.P1C1) }
                     { this.get_card_img(this.state.P1C2) }
  
