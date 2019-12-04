@@ -17,7 +17,43 @@ import S10 from './images/10S.png'; import H10 from './images/10H.png'; import D
 import S11 from './images/JS.png';  import H11 from './images/JH.png';   import D11 from './images/JD.png'; import C11 from './images/JC.png';
 import S12 from './images/QS.png';  import H12 from './images/QH.png';  import D12 from './images/QD.png';  import C12 from './images/QC.png';
 import S13 from './images/KS.png';  import H13 from './images/KH.png';  import D13 from './images/KD.png';  import C13 from './images/KC.png';
- 
+
+/* Polyfill to resolve require.context() in jest from stackoverflow */
+if (typeof require.context === 'undefined') {
+  const fs = require('fs');
+  const path = require('path');
+
+  require.context = (base = '.', scanSubDirectories = false, regularExpression = /\.js$/) => {
+    const files = {};
+
+    function readDirectory(directory) {
+      fs.readdirSync(directory).forEach((file) => {
+        const fullPath = path.resolve(directory, file);
+
+        if (fs.statSync(fullPath).isDirectory()) {
+          if (scanSubDirectories) readDirectory(fullPath);
+
+          return;
+        }
+
+        if (!regularExpression.test(fullPath)) return;
+
+        files[fullPath] = true;
+      });
+    }
+
+    readDirectory(path.resolve(__dirname, base));
+
+    function Module(file) {
+      return require(file);
+    }
+
+    Module.keys = () => Object.keys(files);
+
+    return Module;
+  };
+}
+
 const images = require.context('./images', true);
 
 class GamePage extends React.Component {
@@ -29,7 +65,8 @@ class GamePage extends React.Component {
         this.state = {Ca1: "", Ca2: "", Ca3: "", Ca4: "", Ca5: "",
                       P1C1: "", P1C2: "", P2C1: "", P2C2: "", P1chips: "",
                       P2chips: "", pot: "", currTurn: "", P1: "", P2: "", Me: "",
-                      num_call: "", num_checks: "", where_in_game: "", P1email: "", P2email: "", Turn_Email: "", smallblind: ""}
+                      num_call: "", num_checks: "", where_in_game: "", P1email: "", 
+                      P2email: "", Turn_Email: "", smallblind: "" , cur_bet: ""}
     }
 
     componentWillMount(){
@@ -78,7 +115,8 @@ class GamePage extends React.Component {
                 Turn_Email: PoneEmail,
                 smallblind: "Begin",
                 cards_dealt: this.deal_nine_cards(),
-                where_in_game: "start"
+                where_in_game: "start",
+                cur_bet: 0
             }, this.begin_hand )
         })
     }
@@ -87,92 +125,97 @@ class GamePage extends React.Component {
 
 //------------------------------------Button Actions Below ---------------------------------------
 
-    //for now, going to make it bet 50 by default
     bet(){
         var amount = document.getElementById("Bet_amount").value;
+        amount = parseInt(amount);
+        this.state.cur_bet = amount;
+        fire.database().ref("/Root/GameID/").update({
+            cur_bet: amount
+        })
+        /*
+        if (this.state.cur_bet == 0){
+            document.getElementById('bet amount').style.visibility='hidden';
+            document.getElementById('Fold').style.visibility='hidden';
+            document.getElementById('Raise').style.visibility='hidden';
+        } else {
+            document.getElementById('bet amount').style.visibility='visible';
+            document.getElementById('Fold').style.visibility='visible';
+            document.getElementById('Raise').style.visibility='visible';
+        }
+        */
         //adjust chips and pot size
-        if (this.state.currTurn == this.state.Me){
-            this.state.P1chips -= 50;
+        if (this.state.currTurn == "Player1"){
+            this.state.P1chips -= amount;
             this.update_P1chips();
-            this.state.pot += 50;
+            this.state.pot += amount;
             this.update_pot();
         } else {
-            this.state.P2chips -= 50;
+            this.state.P2chips -= amount;
             this.update_P2chips();
-            this.state.pot += 50;
+            this.state.pot += amount;
             this.update_pot();
         }
         //adjust turn
         this.update_turn();
     }
-
-    //need to edit
+  
     raise(){
         var amount = document.getElementById("Raise_amount").value;
-        if (this.state.currTurn == this.state.Me){
-            this.state.P1chips -= 150;
+        amount = parseInt(amount);
+        fire.database().ref("/Root/GameID/").update({
+            cur_bet: amount - this.state.cur_bet
+        })
+        /*
+        if (this.state.cur_bet == 0){
+            document.getElementById('bet amount').style.visibility='hidden';
+            document.getElementById('Fold').style.visibility='hidden';
+            document.getElementById('Raise').style.visibility='hidden';
+        } else {
+            document.getElementById('bet amount').style.visibility='visible';
+            document.getElementById('Fold').style.visibility='visible';
+            document.getElementById('Raise').style.visibility='visible';
+        }
+        */
+        if (this.state.currTurn == "Player1"){
+            this.state.P1chips -= amount;
             this.update_P1chips();
-            this.state.pot += 150;
+            this.state.pot += amount;
             this.update_pot();
         } else {
-            this.state.P2chips -= 150;
+            this.state.P2chips -= amount;
             this.update_P2chips();
-            this.state.pot += 150;
+            this.state.pot += amount
             this.update_pot();
         }
         this.update_turn();
     }
 
     call(){
+        //put chips in pot
+        if (this.state.currTurn == "Player1"){
+            this.state.P1chips -= this.state.cur_bet;
+            this.update_P1chips();
+            this.state.pot += this.state.cur_bet;
+            this.update_pot();
+        } else {
+            this.state.P2chips -= this.state.cur_bet;
+            this.update_P2chips();
+            this.state.pot += this.state.cur_bet;
+            this.update_pot();
+        }
         if(this.state.where_in_game == "start"){
-            //put chips in pot
-            if (this.state.currTurn == this.state.Me){
-                this.state.P1chips -= 50;
-                this.update_P1chips();
-                this.state.pot += 50;
-                this.update_pot();
-            } else {
-                this.state.P2chips -= 50;
-                this.update_P2chips();
-                this.state.pot += 50;
-                this.update_pot();
-            }
             //show flop
             this.updateFlop()
             //update where_in game
             this.state.where_in_game = "flop";
             this.update_where_in_game();
         } else if(this.state.where_in_game == "flop"){
-            //put chips in pot
-            if (this.state.currTurn == this.state.Me){
-                this.state.P1chips -= 50;
-                this.update_P1chips();
-                this.state.pot += 50;
-                this.update_pot();
-            } else {
-                this.state.P2chips -= 50;
-                this.update_P2chips();
-                this.state.pot += 50;
-                this.update_pot();
-            }
             //show turn
             this.updateTurn()
             //update where_in game
             this.state.where_in_game = "turn";
             this.update_where_in_game();
         } else if (this.state.where_in_game == "turn"){
-           //put chips in pot
-           if (this.state.currTurn == this.state.Me){
-                this.state.P1chips -= 50;
-                this.update_P1chips();
-                this.state.pot += 50;
-                this.update_pot();
-            } else {
-                this.state.P2chips -= 50;
-                this.update_P2chips();
-                this.state.pot += 50;
-                this.update_pot();
-            }
             //show river
             this.updateRiver()
             //update where_in game
@@ -180,15 +223,59 @@ class GamePage extends React.Component {
             this.update_where_in_game();
         } else if (this.state.where_in_game == "river"){
             //compare hands
-
-
-
+            //var winner = "temp";
+            //kenneth, can you call your function to determine a winner and have it return Player 1 or 2
+            //winner = kenneth_function()
+            var p1_hand = this.hand_check(this.state.cards_dealt[5], this.state.cards_dealt[6]);
+            var p2_hand = this.hand_check(this.state.cards_dealt[7], this.state.cards_dealt[8]);
+            var winner = this.hand_compare(p1_hand, p2_hand);
+            //give winner chips
+            //if player 1 won
+            if (winner == 1){
+                this.state.P1chips += this.state.pot;
+                this.update_P1chips();
+            //if player 2 won
+            } else if (winner == 2){
+                this.state.P2chips += this.state.pot;
+                this.update_P2chips();
+            //if a tie
+            } else {
+                //split the pot
+                this.state.P1chips += this.state.pot/2;
+                this.update_P1chips();
+                this.state.P2chips += this.state.pot/2;
+                this.update_P2chips();
+            }
+            this.state.pot = 0;
+            this.update_pot();
+            fire.database().ref("/Root/GameID/").once('value', snapshot => {
+                /* Set State Variables */
+                this.setState({
+                    cards_dealt: this.deal_nine_cards(),
+                    where_in_game: "start"
+                }, this.begin_hand )
+            })
         }
         //reset num_checks
         this.state.num_checks = 0;
         this.update_num_checks();
         //update turn;
         this.update_turn();
+        this.state.cur_bet = 0;
+        fire.database().ref("/Root/GameID/").update({
+            cur_bet: 0
+        })
+        /*
+        if (this.state.cur_bet == 0){
+            document.getElementById('bet amount').style.visibility='hidden';
+            document.getElementById('Fold').style.visibility='hidden';
+            document.getElementById('Raise').style.visibility='hidden';
+        } else {
+            document.getElementById('bet amount').style.visibility='visible';
+            document.getElementById('Fold').style.visibility='visible';
+            document.getElementById('Raise').style.visibility='visible';
+        }
+        */
     }
 
     check(){
@@ -215,9 +302,37 @@ class GamePage extends React.Component {
                 this.update_where_in_game();
             } else if (this.state.where_in_game == "river"){
                 //compare hands
-
-
-
+                //kenneth, can you call your function to determine a winner and have it return Player 1 or 2
+                //winner = kenneth_function()
+                var p1_hand = this.hand_check(this.state.cards_dealt[5], this.state.cards_dealt[6]);
+                var p2_hand = this.hand_check(this.state.cards_dealt[7], this.state.cards_dealt[8]);
+                var winner = this.hand_compare(p1_hand, p2_hand);
+                //give winner chips
+                //if player 1 won
+                if (winner == 1){
+                    this.state.P1chips += this.state.pot;
+                    this.update_P1chips();
+                //if player 2 won
+                } else if (winner == 2){
+                    this.state.P2chips += this.state.pot;
+                    this.update_P2chips();
+                //if a tie
+                } else {
+                    //split the pot
+                    this.state.P1chips += this.state.pot/2;
+                    this.update_P1chips();
+                    this.state.P2chips += this.state.pot/2;
+                    this.update_P2chips();
+                }
+                this.state.pot = 0;
+                this.update_pot();
+                fire.database().ref("/Root/GameID/").once('value', snapshot => {
+                    /* Set State Variables */
+                    this.setState({
+                        cards_dealt: this.deal_nine_cards(),
+                        where_in_game: "start"
+                    }, this.begin_hand )
+                })
             }
             //reset num_checks
             this.state.num_checks = 0;
@@ -228,13 +343,28 @@ class GamePage extends React.Component {
 
     fold(){
         //give pot to other player
-        if (this.state.currTurn == this.state.Me){
+        if (this.state.currTurn == "Player2"){
             this.state.P1chips += this.state.pot;
             this.update_P1chips();
         } else {
             this.state.P2chips += this.state.pot;
             this.update_P2chips();
         }
+        this.state.cur_bet = 0;
+        fire.database().ref("/Root/GameID/").update({
+            cur_bet: 0
+        })
+        /*
+        if (this.state.cur_bet == 0){
+            document.getElementById('bet amount').style.visibility='hidden';
+            document.getElementById('Fold').style.visibility='hidden';
+            document.getElementById('Raise').style.visibility='hidden';
+        } else {
+            document.getElementById('bet amount').style.visibility='visible';
+            document.getElementById('Fold').style.visibility='visible';
+            document.getElementById('Raise').style.visibility='visible';
+        }
+        */
         fire.database().ref("/Root/GameID/").once('value', snapshot => {
             /* Set State Variables */
             this.setState({
@@ -292,17 +422,18 @@ class GamePage extends React.Component {
         fire.database().ref()
     }
 
+
     /*upload_turn(){
         var whos_turn = "Player 1";
+
+    upload_turn(){
+        var whos_turn = "Player1";
+
         fire.database().ref("/Root/GameID/turn").set({
             currTurn: whos_turn
         })
         fire.database().ref()
     }*/
-
-
-
-
 
 
 
@@ -404,7 +535,7 @@ class GamePage extends React.Component {
         var P2 = this.state.P2email;
         var SB = this.state.smallblind;
         if(SB == "P2"){
-            var newTurn = "Player 2";
+            var newTurn = "Player2";
             fire.database().ref("/Root/GameID/turn").update({
                 currTurn: newTurn
             })
@@ -415,7 +546,7 @@ class GamePage extends React.Component {
             })
         }
         else{
-            var newTurn = "Player 1";
+            var newTurn = "Player1";
             fire.database().ref("/Root/GameID/turn").update({
                 currTurn: newTurn
             })
@@ -451,7 +582,7 @@ class GamePage extends React.Component {
         var P2 = this.state.P2email;
         var SB = this.state.smallblind;
         if(SB == "P2"){
-            var newTurn = "Player 2";
+            var newTurn = "Player2";
             fire.database().ref("/Root/GameID/turn").update({
                 currTurn: newTurn
             })
@@ -462,7 +593,7 @@ class GamePage extends React.Component {
             })
         }
         else{
-            var newTurn = "Player 1";
+            var newTurn = "Player1";
             fire.database().ref("/Root/GameID/turn").update({
                 currTurn: newTurn
             })
@@ -498,7 +629,7 @@ class GamePage extends React.Component {
         var P2 = this.state.P2email;
         var SB = this.state.smallblind;
         if(SB == "P2"){
-            var newTurn = "Player 2";
+            var newTurn = "Player2";
             fire.database().ref("/Root/GameID/turn").update({
                 currTurn: newTurn
             })
@@ -509,7 +640,7 @@ class GamePage extends React.Component {
             })
         }
         else{
-            var newTurn = "Player 1";
+            var newTurn = "Player1";
             fire.database().ref("/Root/GameID/turn").update({
                 currTurn: newTurn
             })
@@ -578,7 +709,7 @@ class GamePage extends React.Component {
 //------------------------------------Hand Comparisons Below ---------------------------------------
 
     get_value(card){
-        var val = card.slice(0, card.length);
+        var val = card.slice(0, card.length-1);
         if(val == "1")
             return 14;
         else if(val == "J")
@@ -594,33 +725,323 @@ class GamePage extends React.Component {
         return  card.slice(card.length-1, card.length);
     }
 
-    hand_check(){
-        var hand = [this.state.Ca1, this.state.Ca2, this.state.Ca3, this.state.Ca4, this.state.Ca5, this.state.P1C1, this.state.P1C2];
-        if(this.royal_flush_check(hand)){
-            return "royal flush";
+    hand_check(card1, card2){
+        var hand = [this.state.Ca1, this.state.Ca2, this.state.Ca3, this.state.Ca4, this.state.Ca5, card1, card2];
+        var return_array = [];
+        //console.log(this.get_value(card1));
+        return_array = this.royal_flush_check(hand);
+        if(return_array[0] == 9){
+            return return_array;
+        }
+        console.log("no royal flush");
+        return_array = this.straight_flush_check(hand);
+        if(return_array[0] == 8){
+            return return_array;
+        }
+        console.log("no straight flush");
+        return_array = this.four_kind_check(hand);
+        if(return_array[0] == 7){
+            console.log(return_array[1]);
+            return return_array;
+        }
+        console.log("no four of a kind");
+        return_array = this.full_house_check(hand);
+        if(return_array[0] == 6){
+            return return_array;
+        }
+        console.log("no full house");
+        return_array = this.flush_check(hand);
+        if(return_array[0] == 5){
+            return return_array;
+        }
+        console.log("no flush");
+        return_array = this.straight_check(hand);
+        if(return_array[0] == 4){
+            return return_array;
+        }
+        console.log("no straihgt");
+        return_array = this.triple_check(hand);
+        if(return_array[0] == 3){
+            return return_array;
+        }
+        console.log("no triple");
+        return_array = this.double_pair_check(hand);
+        if(return_array[0] == 2){
+            return return_array;
+        }
+        console.log("no double pair");
+        return_array = this.pair_check(hand);
+        if(return_array[0] == 1){
+            return return_array;
+        }
+        console.log("no pair");
+        var largest_card = 0;
+        for(var i = 5; i < 7; i++){
+            if(this.get_value(hand[i]) > largest_card){
+                largest_card = this.get_value(hand[i]);
+            }
+        }
+        //console.log(largest_card);
+        return [0, largest_card];
+
+    }
+
+    hand_compare(hand1, hand2){
+        if(hand1[0] > hand2[0]){
+            return 1;
+        }
+        else if(hand1[0] < hand2[0]){
+            return 2;
+        }
+        else{
+            if(hand1[0] == 9){
+                return 3;
+            }
+            else if(hand1[0] == 8){
+                if(hand1[1] > hand2[1]){
+                    return 1;
+                }
+                else if(hand1[1] < hand2[1]){
+                    return 2;
+                }
+                else{
+                    return 3;
+                }
+            }
+            else if(hand1[0] == 7){
+                if(hand1[1] > hand2[1]){
+                    return 1;
+                } 
+                else if(hand1[1] < hand2[1]){
+                    return 2;
+                }
+                else{
+                    return 3;
+                }
+            }
+            else if(hand1[0] == 6){
+                if(hand1[1] > hand2[1]){
+                    return 1;
+                }
+                else if(hand1[1] < hand2[1]){
+                    return 2;
+                }
+                else{
+                    if(hand1[2] > hand2[2]){
+                        return 1;
+                    }
+                    else if(hand1[2] < hand2[2]){
+                        return 2;
+                    }
+                    else{
+                        return 3;
+                    }
+                }
+            }
+            else if(hand1[0] == 5){
+                return 3;
+            }
+            else if(hand1[0] == 4){
+                if (hand1[1] > hand2[1]){
+                    return 1;
+                }
+                else if(hand1[1] < hand2[1]){
+                    return 2;
+                }
+                else{
+                    return 3;
+                }
+            }
+            else if(hand1[0] == 3){
+                if (hand1[1] > hand2[1]){
+                    return 1;
+                }
+                else if(hand1[1] < hand2[1]){
+                    return 2;
+                }
+                else{
+                    return 3;
+                }
+            }
+            else if(hand1[0] == 2){
+                if (hand1[1] > hand2[1]){
+                    return 1;
+                }
+                else if(hand1[1] < hand2[1]){
+                    return 2;
+                }
+                else{
+                    if (hand1[2] > hand2[2]){
+                        return 1;
+                    }
+                    else if(hand1[2] < hand2[2]){
+                        return 2;
+                    }
+                    else{
+                        return 3;
+                    }
+
+                }
+
+            }
+            else if(hand1[0] == 1){
+                if (hand1[1] > hand2[1]){
+                    return 1;
+                }
+                else if(hand1[1] < hand2[1]){
+                    return 2;
+                }
+                else{
+                    return 3;
+                }
+            }
+            else{
+                if (hand1[1] > hand2[1]){
+                    return 1;
+                }
+                else if(hand1[1] < hand2[1]){
+                    return 2;
+                }
+                else{
+                    return 3;
+                }
+
+            }
         }
     }
 
     royal_flush_check(current_cards){
         var royals_check = false;
-        var same_suit_check = false
-        var sorted_hand = current_cards.sort(function(a, b) {return a-b;});
-        if(this.get_value(sorted_hand[2]) == 10 && this.get_value(sorted_hand[3]) == 11 && this.get_value(sorted_hand[4]) == 12 && this.get_value(sorted_hand[5]) == 13 && this.get_value(sorted_hand[6]) == 14){
+        var same_suit_check = false;
+        var sorted_hand_values_temp = [];
+        var sorted_hand_suits_temp = [];
+        for(var i = 0; i < 7; i++){
+            sorted_hand_values_temp[i] = this.get_value(current_cards[i]);
+        }
+        for(var i = 0; i < 7; i++){
+            sorted_hand_suits_temp[i] = this.get_suit(current_cards[i]);
+        }
+        var list = [];
+        for(var j = 0; j < 7; j++){
+            list.push({'value': sorted_hand_values_temp[i], 'suit': sorted_hand_suits_temp[i]});
+        }
+        var sorted_hand = list.sort(function(a, b) {return a.value - b.value});
+        if(sorted_hand[2].value == 10 && sorted_hand[3].value == 11 && sorted_hand[4].value == 12 && sorted_hand[5].value == 13 && sorted_hand[6].value == 14){
             royals_check = true;
         }
-        if(this.get_suit(sorted_hand[2]) == this.get_suit(sorted_hand[3]) == this.get_suit(sorted_hand[4]) == this.get_suit(sorted_hand[5]) == this.get_suit(sorted_hand[6])){
+        if(sorted_hand[2].suit == sorted_hand[3].suit == sorted_hand[4].suit == sorted_hand[5].suit == sorted_hand[6].suit){
             same_suit_check = true;
         } 
         if(royals_check == true && same_suit_check == true){
-            return true;
+            return [9];
         }
         else{
-            return false;
+            return [0];
         }
     }
 
+    straight_flush_check(current_cards){
+        var sorted_hand_values_temp = [];
+        var sorted_hand_suits_temp = [];
+        for(var i = 0; i < 7; i++){
+            sorted_hand_values_temp[i] = this.get_value(current_cards[i]);
+        }
+        for(var i = 0; i < 7; i++){
+            sorted_hand_suits_temp[i] = this.get_suit(current_cards[i]);
+        }
+        var list = [];
+        for(var j = 0; j < 7; j++){
+            list.push({'value': sorted_hand_values_temp[i], 'suit': sorted_hand_suits_temp[i]});
+        }
+        var sorted_hand = list.sort(function(a, b) {return a.value - b.value});
+
+        var straight_count = 1;
+        var highest_card_value = sorted_hand[0].value;
+        var highest_card_suit = sorted_hand[0].suit;
+        var temp = highest_card_value;
+        for(var i = 0; i < 7; i++){
+            if(i != 6){
+                if((sorted_hand[i+1].value == temp - 1) && (sorted_hand[i+1].suit == highest_card_suit)){
+                    straight_count++; 
+                    temp--;
+                } 
+                else{
+                    straight_count = 1;
+                    highest_card_value = sorted_hand[i+1].value;
+                    highest_card_suit = sorted_hand[i+1].suit;
+                    temp = highest_card_value;
+                }
+            }
+        }
+        if(straight_count >= 5){
+            return [8, highest_card_value];
+        }
+        if(sorted_hand[0].value == 14){
+            highest_card_value = 5;
+            highest_card_suit = sorted_hand[0].suit;
+            temp = highest_card_value;
+            straight_count = 1;
+            for(var i = 3; i < 7; i++){
+                if(i != 6){
+                    if((sorted_hand[i+1].value == temp - 1) && (highest_card_suit == sorted_hand[i+1].suit)){
+                        straight_count++; 
+                        temp--;
+                    } 
+                    else{
+                        break;
+                    }
+
+                }
+            }
+        }
+        if(straight_count == 4){
+            return [8, 5];
+        }
+        return [0];
+    }
+
+    four_kind_check(current_cards){
+        var sorted_hand_values_temp = [];
+        for(var i = 0; i < 7; i++){
+            sorted_hand_values_temp[i] = this.get_value(current_cards[i]);
+        }
+        var reverse_sorted_hand = [];
+        reverse_sorted_hand = sorted_hand_values_temp.sort(function(a, b) {return b-a;});
+        var quad_check = false;
+        var quad_count = 0;
+        var quad_value = 0;
+        var temp = 0;
+        //Check for the highest triple
+        for(var i = 0; i < 7; i++){
+            if(temp == reverse_sorted_hand[i]){
+                quad_count++;
+                if(quad_count == 4){
+                    console.log(quad_count);
+                    quad_check = true;
+                    quad_value = reverse_sorted_hand[i]
+                    break;
+                }
+            }
+            else{
+                temp = reverse_sorted_hand[i];
+                quad_count = 1;
+            }
+        }
+        if(quad_check == false){
+            return [0];
+        }
+        else{
+            console.log("why are we in the else statement");
+            return [7, quad_value];
+        }
+ 
+    }
     full_house_check(current_cards){
-        var reverse_sorted_hand = current_cards.sort(function(a, b) {return b-a;}); //Reverse sort to find the highest triple/pair first
+        var sorted_hand_values_temp = [];
+        for(var i = 0; i < 7; i++){
+            sorted_hand_values_temp[i] = this.get_value(current_cards[i]);
+        }
+        var reverse_sorted_hand = sorted_hand_values_temp.sort(function(a, b) {return b-a;}); //Reverse sort to find the highest triple/pair first
         var triple_check = false;
         var pair_check = false;
         var triple_count = 0;
@@ -630,52 +1051,272 @@ class GamePage extends React.Component {
         var temp = 0;
         //Check for the highest triple
         for(var i = 0; i < 7; i++){
-            if(temp == this.get_value(reverse_sorted_hand[i])){
+            if(temp == reverse_sorted_hand[i]){
                 triple_count++;
                 if(triple_count == 3){
                     triple_check = true;
-                    triple_value = this.get_value(reverse_sorted_hand[i])
+                    triple_value = reverse_sorted_hand[i];
                     break;
                 }
             }
             else{
-                temp = this.get_value(reverse_sorted_hand[i]);
+                temp = reverse_sorted_hand[i];
                 triple_count = 1;
             }
         }
-        if(triple_check = false){
+        if(triple_check == false){
+            console.log("full house triple check false");
             return [0,0];
         }
+        console.log(triple_value);
         //Check for the highest double, make sure not to count the triple cards though
         temp = 0;
         for(var i = 0; i < 7; i++){
-            if(temp == this.get_value(reverse_sorted_hand[i])){
+            if(temp == reverse_sorted_hand[i]){
                 double_count++;
                 if(double_count == 2){
-                    if(this.get_value(reverse_sorted_hand[i] == triple_value)){
+                    if(reverse_sorted_hand[i] == triple_value){
                         double_count = 1;
                         i++;
                     }
                     else{
                         pair_check = true;
-                        double_value = this.get_value(reverse_sorted_hand[i])
+                        double_value = reverse_sorted_hand[i];
                         break;
                     }
                 }
             }
             else{
-                this.temp = this.get_value(reverse_sorted_hand[i]);
+                temp = reverse_sorted_hand[i];
                 double_count = 1;
             }
         }
-        if(pair_check = false){
+        if(pair_check == false){
+            console.log("full house double check false");
+            console.log(double_value);
             return [0,0]
         }
-        return [triple_value, double_value];
+        console.log(double_value);
+        return [6, triple_value, double_value];
     }
 
-//------------------------------------Hand Comparisons Above ---------------------------------------
+    flush_check(current_cards){
+        var flush_check = false;
+        var spade_flush_check = 0;
+        var club_flush_check = 0;
+        var heart_flush_check = 0;
+        var diamond_flush_check = 0;
+        for(var i = 0; i < 7; i++){
+            if(this.get_suit(current_cards[i]) == "S"){
+                spade_flush_check++;
+           }
+        }
+        if(spade_flush_check >= 5){
+            return [5];
+            flush_check = true;
+        }
+        for(var i = 0; i < 7; i++){
+            if(this.get_suit(current_cards[i]) == "C"){
+                club_flush_check++;
+           }
+        }
+        if(club_flush_check >= 5){
+            return [5];
+            flush_check = true;
+        }
+        for(var i = 0; i < 7; i++){
+            if(this.get_suit(current_cards[i]) == "H"){
+                heart_flush_check++;
+           }
+        }
+        if(heart_flush_check >= 5){
+            return [5];
+            flush_check = true;
+        }
+        for(var i = 0; i < 7; i++){
+            if(this.get_suit(current_cards[i]) == "D"){
+                diamond_flush_check++;
+           }
+        }
+        if(diamond_flush_check >= 5){
+            return [5];
+            flush_check = true;
+        }
+        return [0];
+    }
 
+    straight_check(current_cards){
+        var sorted_hand_values_temp = [];
+        for(var i = 0; i < 7; i++){
+            sorted_hand_values_temp[i] = this.get_value(current_cards[i]);
+        }
+        var reverse_sorted_hand = [];
+        reverse_sorted_hand = sorted_hand_values_temp.sort(function(a, b) {return b-a;});
+        var straight_count = 1;
+        var highest_card = reverse_sorted_hand[0];
+        var temp = highest_card;
+        for(var i = 0; i < 7; i++){
+            if(i != 6){
+                if(reverse_sorted_hand[i+1] == temp - 1){
+                    straight_count++; 
+                    temp--;
+                } 
+                else{
+                    straight_count = 1;
+                    highest_card = reverse_sorted_hand[i+1];
+                    temp = highest_card;
+                }
+            }
+        }
+        if(straight_count >= 5){
+            return [4, highest_card];
+        }
+        if(reverse_sorted_hand[0] == 14){
+            highest_card = 5;
+            temp = 5;
+            straight_count = 1;
+            for(var i = 3; i < 7; i++){
+                if(i != 6){
+                    if(reverse_sorted_hand[i+1] == temp - 1){
+                        straight_count++; 
+                    } 
+                    else{
+                        straight_count = 1;
+                        highest_card = reverse_sorted_hand[i+1];
+                        temp = highest_card;
+                    }
+
+                }
+            }
+        }
+        if(straight_count == 4){
+            return [4, 5];
+        }
+        return [0];
+    }
+
+    triple_check(current_cards){
+        var sorted_hand_values_temp = [];
+        for(var i = 0; i < 7; i++){
+            sorted_hand_values_temp[i] = this.get_value(current_cards[i]);
+        }
+        var reverse_sorted_hand = sorted_hand_values_temp.sort(function(a, b) {return b-a;}); 
+        var triple_check = false;
+        var triple_count = 0;
+        var triple_value = 0;
+        var temp = 0;
+        //Check for the highest triple
+        for(var i = 0; i < 7; i++){
+            if(temp == reverse_sorted_hand){
+                triple_count++;
+                if(triple_count == 3){
+                    triple_check = true;
+                    triple_value = reverse_sorted_hand[i]
+                    break;
+                }
+            }
+            else{
+                temp = reverse_sorted_hand[i];
+                triple_count = 1;
+            }
+        }
+        if(triple_check == false){
+            return [0];
+        }
+        return [3, triple_value];
+
+    }
+    
+    double_pair_check(current_cards){
+        var sorted_hand_values_temp = [];
+        for(var i = 0; i < 7; i++){
+            sorted_hand_values_temp[i] = this.get_value(current_cards[i]);
+        }
+        var reverse_sorted_hand = sorted_hand_values_temp.sort(function(a, b) {return b-a;}); //Reverse sort to find the highest triple/pair first
+        var double_1_check = false;
+        var pair_2_check = false;
+        var double_count_1 = 0;
+        var double_value_1 = 0;
+        var double_count_2 = 0;
+        var double_value_2 = 0;
+        var temp = 0;
+        //Check for the highest double
+        for(var i = 0; i < 7; i++){
+            if(temp == reverse_sorted_hand[i]){
+                double_count_1++;
+                if(double_count_1 == 2){
+                    double_1_check = true;
+                    double_value_1 = reverse_sorted_hand[i];
+                    break;
+                }
+            }
+            else{
+                temp = reverse_sorted_hand[i];
+                double_count_1 = 1;
+            }
+        }
+        if(double_1_check == false){
+            return [0];
+        }
+        //Check for the highest double, make sure not to count the triple cards though
+        temp = 0;
+        for(var i = 0; i < 7; i++){
+            if(temp == reverse_sorted_hand[i]){
+                double_count_2++;
+                if(double_count_2 == 2){
+                    if(reverse_sorted_hand[i] == double_value_1){
+                        double_count_2 = 1;
+                    }
+                    else{
+                        pair_2_check = true;
+                        double_value_2 = reverse_sorted_hand[i];
+                        break;
+                    }
+                }
+            }
+            else{
+                temp = reverse_sorted_hand[i];
+                double_count_2 = 1;
+            }
+        }
+        if(pair_2_check == false){
+            return [0]
+        }
+        return [2, double_value_1, double_value_2];
+    }
+
+
+    pair_check(current_cards){
+        var sorted_hand_values_temp = [];
+        for(var i = 0; i < 7; i++){
+            sorted_hand_values_temp[i] = this.get_value(current_cards[i]);
+        }
+        var reverse_sorted_hand = sorted_hand_values_temp.sort(function(a, b) {return b-a;}); 
+        var double_check = false;
+        var double_count = 0;
+        var double_value = 0;
+        var temp = 0;
+        //Check for the highest triple
+        for(var i = 0; i < 7; i++){
+            if(temp == reverse_sorted_hand[i]){
+                double_count++;
+                if(double_count == 2){
+                    double_check = true;
+                    double_value = reverse_sorted_hand[i]
+                    break;
+                }
+            }
+            else{
+                temp = reverse_sorted_hand[i];
+                double_count = 1;
+            }
+        }
+        if(double_check == false){
+            return [0];
+        }
+        return [1, double_value];
+    } 
+//------------------------------------Hand Comparisons Above ---------------------------------------
 
 
 //------------------------------------Begin Hand and HTML Below ---------------------------------------
@@ -685,6 +1326,20 @@ begin_hand(){
     //show back of all cards at the begginning of the hand
     this.resetBoard();
     this.dealPlayers();
+    fire.database().ref("/Root/GameID/").update({
+        cur_bet: 0
+    })
+    /*
+    if (this.state.cur_bet == 0){
+        document.getElementById('bet amount').style.visibility='hidden';
+        document.getElementById('Fold').style.visibility='hidden';
+        document.getElementById('Raise').style.visibility='hidden';
+    } else {
+        document.getElementById('bet amount').style.visibility='visible';
+        document.getElementById('Fold').style.visibility='visible';
+        document.getElementById('Raise').style.visibility='visible';
+    }
+    */
     this.state.Ca1 = "back";
     this.state.Ca2 = "back";
     this.state.Ca3 = "back";
@@ -724,6 +1379,7 @@ begin_hand(){
         var currUser = fire.auth().currentUser.uid;
         var P2Chips = snapshot.child("P2chips").val()
         var P1Chips = snapshot.child("P1chips").val()
+        var current_bet = snapshot.child("cur_bet").val()
         var where = snapshot.child("where_in_game").child("where_in_game").val()
         var sPOT = snapshot.child("pot").val()
         var ncall = snapshot.child("num_call").child("num_call").val()
@@ -750,7 +1406,8 @@ begin_hand(){
                 pot: sPOT,
                 num_call: ncall,
                 num_checks: nchecks,
-                currTurn: Nturn
+                currTurn: Nturn,
+                cur_bet: current_bet
             })
     })    
 }
@@ -763,7 +1420,7 @@ begin_hand(){
                 </div>
                 <div style={{display: 'flex', justifyContent: 'center', height: "50%", margin: '50px'}}>
                     <h1 style={{textAlign: "center", margin: '30px', marginLeft: '210px'}}>
-                        Opponent Stack<br/> {this.state.P2chips} </h1>
+                        Player2's Stack<br/> {this.state.P2chips} </h1>
                     { this.get_card_img("back") }
                     { this.get_card_img("back") }
                 </div>
@@ -778,8 +1435,9 @@ begin_hand(){
                 </div>
  
                 <div style={{display: 'flex', justifyContent: 'center', height: "100%", margin: '50px'}}>
+                  <h1 id = "bet amount" style={{textAlign: "center", margin: '30px'}}>Amount to Call<br/> {this.state.cur_bet}</h1>
                     <h1 style={{textAlign: "center", margin: '30px', marginLeft: '300px'}}>
-                        My Stack<br/> {this.state.P1chips} </h1>
+                        Player1's Stack<br/> {this.state.P1chips} </h1>
                     { this.get_card_img(this.state.P1C1) }
                     { this.get_card_img(this.state.P1C2) }
  
