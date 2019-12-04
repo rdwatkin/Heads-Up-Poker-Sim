@@ -66,11 +66,11 @@ class GamePage extends React.Component {
                       P1C1: "", P1C2: "", P2C1: "", P2C2: "", P1chips: "",
                       P2chips: "", pot: "", currTurn: "", P1: "", P2: "", Me: "",
                       num_call: "", num_checks: "", where_in_game: "", P1email: "", 
-                      P2email: "", Turn_Email: "", smallblind: "", cur_bet: ""}
+                      P2email: "", Turn_Email: "", smallblind: "" , cur_bet: ""}
     }
 
     componentWillMount(){
-        this.upload_turn();
+        //this.upload_turn();
         //Get Cards From Database
         fire.database().ref("/Root/GameID/").once('value', snapshot => {
             var currUser = fire.auth().currentUser.uid;
@@ -125,7 +125,6 @@ class GamePage extends React.Component {
 
 //------------------------------------Button Actions Below ---------------------------------------
 
-    //for now, going to make it bet 50 by default
     bet(){
         var amount = document.getElementById("Bet_amount").value;
         amount = parseInt(amount);
@@ -159,8 +158,7 @@ class GamePage extends React.Component {
         //adjust turn
         this.update_turn();
     }
-
-    //need to edit
+  
     raise(){
         var amount = document.getElementById("Raise_amount").value;
         amount = parseInt(amount);
@@ -424,20 +422,31 @@ class GamePage extends React.Component {
         fire.database().ref()
     }
 
+
+    /*upload_turn(){
+        var whos_turn = "Player 1";
+
     upload_turn(){
         var whos_turn = "Player1";
+
         fire.database().ref("/Root/GameID/turn").set({
             currTurn: whos_turn
         })
         fire.database().ref()
-    }
+    }*/
+
+
+
+
+//update turn has issue where not showing whose turn it is properly
+
 
     update_turn(){
         var turn = this.state.currTurn;
         var P1 = this.state.P1email;
         var P2 = this.state.P2email;
-        if(turn == "Player1"){
-            var newTurn = "Player2";
+        if(turn == P1){
+            var newTurn = P2;
             fire.database().ref("/Root/GameID/turn").update({
                 currTurn: newTurn
             })
@@ -448,7 +457,7 @@ class GamePage extends React.Component {
             })
         }
         else{
-            var newTurn = "Player1";
+            var newTurn = P1;
             fire.database().ref("/Root/GameID/turn").update({
                 currTurn: newTurn
             })
@@ -1310,7 +1319,6 @@ class GamePage extends React.Component {
 //------------------------------------Hand Comparisons Above ---------------------------------------
 
 
-
 //------------------------------------Begin Hand and HTML Below ---------------------------------------
 
 begin_hand(){
@@ -1427,7 +1435,7 @@ begin_hand(){
                 </div>
  
                 <div style={{display: 'flex', justifyContent: 'center', height: "100%", margin: '50px'}}>
-                    <h1 id = "bet amount" style={{textAlign: "center", margin: '30px'}}>Amount to Call<br/> {this.state.cur_bet}</h1>
+                  <h1 id = "bet amount" style={{textAlign: "center", margin: '30px'}}>Amount to Call<br/> {this.state.cur_bet}</h1>
                     <h1 style={{textAlign: "center", margin: '30px', marginLeft: '300px'}}>
                         Player1's Stack<br/> {this.state.P1chips} </h1>
                     { this.get_card_img(this.state.P1C1) }

@@ -90,6 +90,10 @@ class playerSelect extends React.Component {
         fire.database().ref("/Root/GameID/Player2_Email").set({
             email: user2e
         });
+        fire.database().ref("/Root/GameID/turn").set({
+            currTurn: user1e
+        })
+        fire.database().ref()
         this.props.history.push('./gamepage');
     }
 
