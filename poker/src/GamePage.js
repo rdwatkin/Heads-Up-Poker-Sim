@@ -144,7 +144,9 @@ class GamePage extends React.Component {
         }
         */
         //adjust chips and pot size
-        if (this.state.currTurn == "Player1"){
+        //console.log(this.state.P1email);
+        //console.log(this.state.Turn_Email);
+        if (this.state.currTurn == this.state.P1email){
             this.state.P1chips -= amount;
             this.update_P1chips();
             this.state.pot += amount;
@@ -176,7 +178,7 @@ class GamePage extends React.Component {
             document.getElementById('Raise').style.visibility='visible';
         }
         */
-        if (this.state.currTurn == "Player1"){
+        if (this.state.currTurn == this.state.P1email){
             this.state.P1chips -= amount;
             this.update_P1chips();
             this.state.pot += amount;
@@ -192,7 +194,7 @@ class GamePage extends React.Component {
 
     call(){
         //put chips in pot
-        if (this.state.currTurn == "Player1"){
+        if (this.state.currTurn == this.state.P1email){
             this.state.P1chips -= this.state.cur_bet;
             this.update_P1chips();
             this.state.pot += this.state.cur_bet;
@@ -343,7 +345,7 @@ class GamePage extends React.Component {
 
     fold(){
         //give pot to other player
-        if (this.state.currTurn == "Player2"){
+        if (this.state.currTurn == this.state.P2email){
             this.state.P1chips += this.state.pot;
             this.update_P1chips();
         } else {
